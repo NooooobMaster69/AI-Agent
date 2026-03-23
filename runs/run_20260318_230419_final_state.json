@@ -1,0 +1,55 @@
+{
+  "run_id": "20260318_230419",
+  "task": "research OpenAI and summarize what the company does",
+  "current_phase": "review",
+  "spec": {
+    "user_goal": "Research OpenAI and summarize what the company does.",
+    "task_type": "business_research",
+    "must_do": [
+      "Research OpenAI using reliable sources.",
+      "Summarize the company's core products, services, and business focus.",
+      "Keep the summary concise and factual."
+    ],
+    "must_not_do": [
+      "Do not speculate beyond sourced information.",
+      "Do not include unsupported claims or rumors.",
+      "Do not modify any files unless necessary for the report."
+    ],
+    "deliverables": [
+      "A concise written summary of what OpenAI does.",
+      "Optionally note key product areas and target users."
+    ],
+    "allowed_tools": [
+      "browser",
+      "code_inspection",
+      "report_write",
+      "web_research"
+    ],
+    "allowed_write_paths": [
+      "/tmp"
+    ],
+    "risk_level": "low",
+    "done_when": [
+      "The summary clearly explains what OpenAI does.",
+      "The information is based on research from reliable sources.",
+      "The response is concise and ready for the user to read."
+    ]
+  },
+  "completed_steps": [
+    "web_research_stub",
+    "local_summarize",
+    "final_report"
+  ],
+  "pending_steps": [],
+  "findings": [
+    "Collected 0 web results.",
+    "Generated local summary."
+  ],
+  "artifacts": [
+    "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json",
+    "F:\\AI Agent\\ai_agent\\artifacts\\web\\research_openai_and_summarize_what_the_company_does.json"
+  ],
+  "paused": false,
+  "pause_reason": null,
+  "final_status": "completed"
+}

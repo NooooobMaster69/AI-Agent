@@ -1,0 +1,183 @@
+{
+  "task": "write a 30 page physical therapy clinic business plan based on an example and web research",
+  "task_spec": {
+    "user_goal": "write a 30 page physical therapy clinic business plan based on an example and web research",
+    "task_family": "research_writing",
+    "workflow_hint": "research_writing",
+    "must_do": [],
+    "must_not_do": [],
+    "deliverables": [
+      "outline",
+      "research notes",
+      "draft report"
+    ],
+    "deliverable_types": [
+      "document"
+    ],
+    "requested_tools": [
+      "filesystem_read",
+      "report_write",
+      "web_research"
+    ],
+    "approved_tools": [
+      "filesystem_read",
+      "report_write",
+      "web_research"
+    ],
+    "allowed_tools": [
+      "filesystem_read",
+      "report_write",
+      "web_research"
+    ],
+    "allowed_write_paths": [
+      "artifacts",
+      "runs"
+    ],
+    "risk_level": "medium",
+    "ambiguity_level": "low",
+    "needs_external_research": true,
+    "needs_example_analysis": true,
+    "needs_longform_output": true,
+    "needs_browser_execution": false,
+    "needs_local_files": true,
+    "needs_code_changes": false,
+    "needs_media_processing": false,
+    "success_criteria": [
+      "Outline is generated",
+      "Research questions are generated",
+      "Draft sections are created"
+    ],
+    "requires_human_approval": false,
+    "has_external_side_effects": false,
+    "irreversible_action_possible": false,
+    "involves_credentials": false,
+    "involves_payment": false,
+    "involves_sensitive_data": false
+  },
+  "workflow": "research_writing",
+  "plan": [
+    {
+      "id": 1,
+      "kind": "understand_requirements",
+      "tool": "none",
+      "goal": "Extract the assignment goals, constraints, and deliverables.",
+      "requires_approval": false
+    },
+    {
+      "id": 2,
+      "kind": "analyze_examples",
+      "tool": "filesystem_read",
+      "goal": "Analyze example structure if examples are provided.",
+      "requires_approval": false
+    },
+    {
+      "id": 3,
+      "kind": "outline",
+      "tool": "report_write",
+      "goal": "Generate an outline and section plan.",
+      "requires_approval": false
+    },
+    {
+      "id": 4,
+      "kind": "research",
+      "tool": "web_research",
+      "goal": "Collect supporting facts, benchmarks, and references.",
+      "requires_approval": false
+    },
+    {
+      "id": 5,
+      "kind": "draft_sections",
+      "tool": "report_write",
+      "goal": "Draft section-by-section content.",
+      "requires_approval": false
+    },
+    {
+      "id": 6,
+      "kind": "final_report",
+      "tool": "report_write",
+      "goal": "Assemble a coherent final draft.",
+      "requires_approval": false
+    }
+  ],
+  "state": {
+    "run_id": "20260323_140918",
+    "task": "write a 30 page physical therapy clinic business plan based on an example and web research",
+    "current_phase": "planning",
+    "spec": {
+      "user_goal": "write a 30 page physical therapy clinic business plan based on an example and web research",
+      "task_family": "research_writing",
+      "workflow_hint": "research_writing",
+      "must_do": [],
+      "must_not_do": [],
+      "deliverables": [
+        "outline",
+        "research notes",
+        "draft report"
+      ],
+      "deliverable_types": [
+        "document"
+      ],
+      "requested_tools": [
+        "filesystem_read",
+        "report_write",
+        "web_research"
+      ],
+      "approved_tools": [
+        "filesystem_read",
+        "report_write",
+        "web_research"
+      ],
+      "allowed_tools": [
+        "filesystem_read",
+        "report_write",
+        "web_research"
+      ],
+      "allowed_write_paths": [
+        "artifacts",
+        "runs"
+      ],
+      "risk_level": "medium",
+      "ambiguity_level": "low",
+      "needs_external_research": true,
+      "needs_example_analysis": true,
+      "needs_longform_output": true,
+      "needs_browser_execution": false,
+      "needs_local_files": true,
+      "needs_code_changes": false,
+      "needs_media_processing": false,
+      "success_criteria": [
+        "Outline is generated",
+        "Research questions are generated",
+        "Draft sections are created"
+      ],
+      "requires_human_approval": false,
+      "has_external_side_effects": false,
+      "irreversible_action_possible": false,
+      "involves_credentials": false,
+      "involves_payment": false,
+      "involves_sensitive_data": false
+    },
+    "completed_steps": [],
+    "pending_steps": [
+      "understand_requirements",
+      "analyze_examples",
+      "outline",
+      "research",
+      "draft_sections",
+      "final_report"
+    ],
+    "findings": [],
+    "artifacts": [
+      "artifacts\\final_report_v2_20260323_140918.md"
+    ],
+    "paused": false,
+    "pause_reason": null,
+    "approval_required": false,
+    "approval_context": {},
+    "last_action": null,
+    "last_action_result": null,
+    "last_confidence": 1.0,
+    "failure_count": 0,
+    "final_status": "planned"
+  }
+}

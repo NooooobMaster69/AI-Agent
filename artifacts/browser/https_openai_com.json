@@ -1,0 +1,9 @@
+{
+  "url": "https://openai.com",
+  "title": "Just a moment...",
+  "screenshot_path": "F:\\AI Agent\\ai_agent\\artifacts\\browser\\https_openai_com.png",
+  "text_path": "F:\\AI Agent\\ai_agent\\artifacts\\browser\\https_openai_com.txt",
+  "text_excerpt": "",
+  "blocked": true,
+  "block_reason": "cloudflare_verification"
+}

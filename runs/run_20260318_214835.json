@@ -1,0 +1,125 @@
+{
+  "task": "debug the code and run tests",
+  "task_spec": {
+    "user_goal": "Debug the code and run tests for the add function in project/src/main.py.",
+    "task_type": "code_task",
+    "must_do": [
+      "Inspect the current add function implementation and identify any issues relative to the tests and task spec.",
+      "Fix the code in project/src/main.py if needed so numeric addition works correctly for int and float inputs.",
+      "Run the test suite after making changes.",
+      "Report the test results clearly."
+    ],
+    "must_not_do": [
+      "Do not modify tests unless absolutely necessary.",
+      "Do not change unrelated files.",
+      "Do not introduce extra functionality beyond what is needed to satisfy the task spec."
+    ],
+    "deliverables": [
+      "Updated source code if a fix is needed.",
+      "Test run results indicating pass/fail status.",
+      "Brief summary of what was changed and why."
+    ],
+    "allowed_tools": [
+      "read_files",
+      "write_files",
+      "run_tests",
+      "shell"
+    ],
+    "allowed_write_paths": [
+      "project/src/main.py"
+    ],
+    "risk_level": "low",
+    "done_when": [
+      "The add function passes the provided tests.",
+      "The test suite has been executed successfully or failures have been explained.",
+      "Any code changes required to satisfy the tests have been applied."
+    ]
+  },
+  "plan": {
+    "goal": "Debug project/src/main.py for the add function and run the test suite, ensuring numeric addition works for int and float inputs.",
+    "steps": [
+      {
+        "id": 1,
+        "action": "inspect_workspace",
+        "reason": "Review the current add implementation and the provided tests/task spec to identify any issues before changing code."
+      },
+      {
+        "id": 2,
+        "action": "local_summarize",
+        "reason": "Summarize whether a code fix is needed and what behavior the function must satisfy for int/float addition and invalid inputs."
+      },
+      {
+        "id": 3,
+        "action": "run_tests",
+        "reason": "Execute the test suite after any required fix to confirm the add function passes the provided tests."
+      },
+      {
+        "id": 4,
+        "action": "final_report",
+        "reason": "Report what was changed, why, and the test results clearly."
+      }
+    ],
+    "done_when": [
+      "The add function passes the provided tests.",
+      "The test suite has been executed successfully or any failures are explained.",
+      "Any necessary code changes to satisfy the task spec have been applied."
+    ]
+  },
+  "state": {
+    "run_id": "20260318_214835",
+    "task": "debug the code and run tests",
+    "current_phase": "review",
+    "spec": {
+      "user_goal": "Debug the code and run tests for the add function in project/src/main.py.",
+      "task_type": "code_task",
+      "must_do": [
+        "Inspect the current add function implementation and identify any issues relative to the tests and task spec.",
+        "Fix the code in project/src/main.py if needed so numeric addition works correctly for int and float inputs.",
+        "Run the test suite after making changes.",
+        "Report the test results clearly."
+      ],
+      "must_not_do": [
+        "Do not modify tests unless absolutely necessary.",
+        "Do not change unrelated files.",
+        "Do not introduce extra functionality beyond what is needed to satisfy the task spec."
+      ],
+      "deliverables": [
+        "Updated source code if a fix is needed.",
+        "Test run results indicating pass/fail status.",
+        "Brief summary of what was changed and why."
+      ],
+      "allowed_tools": [
+        "read_files",
+        "write_files",
+        "run_tests",
+        "shell"
+      ],
+      "allowed_write_paths": [
+        "project/src/main.py"
+      ],
+      "risk_level": "low",
+      "done_when": [
+        "The add function passes the provided tests.",
+        "The test suite has been executed successfully or failures have been explained.",
+        "Any code changes required to satisfy the tests have been applied."
+      ]
+    },
+    "completed_steps": [
+      "inspect_workspace",
+      "local_summarize"
+    ],
+    "pending_steps": [
+      "run_tests",
+      "final_report"
+    ],
+    "findings": [
+      "Generated local summary."
+    ],
+    "artifacts": [
+      "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json"
+    ],
+    "paused": true,
+    "pause_reason": "high_risk_action",
+    "final_status": "paused"
+  }
+}

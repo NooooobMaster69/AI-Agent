@@ -1,0 +1,83 @@
+{
+  "run_id": "20260323_005913",
+  "task": "research OpenAI and summarize what the company does",
+  "current_phase": "review",
+  "spec": {
+    "user_goal": "Research OpenAI and summarize what the company does",
+    "task_type": "business_research",
+    "must_do": [
+      "Research OpenAI using reliable public sources",
+      "Summarize the company's core products, services, and mission",
+      "Keep the summary concise and factual"
+    ],
+    "must_not_do": [
+      "Do not speculate beyond sourced information",
+      "Do not claim access to private or internal company details",
+      "Do not include unsupported opinions"
+    ],
+    "deliverables": [
+      "A brief summary of what OpenAI does",
+      "Key business areas or offerings",
+      "Optional note on company mission"
+    ],
+    "requested_tools": [
+      "web_research",
+      "report_write",
+      "code_inspection"
+    ],
+    "approved_tools": [
+      "web_research",
+      "report_write",
+      "code_inspection"
+    ],
+    "allowed_tools": [
+      "web_research",
+      "report_write",
+      "code_inspection"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "The summary accurately describes OpenAI's business",
+      "Sources have been reviewed and synthesized into a concise response"
+    ],
+    "requires_human_approval": false,
+    "has_external_side_effects": false,
+    "irreversible_action_possible": false,
+    "involves_credentials": false,
+    "involves_payment": false,
+    "involves_sensitive_data": false,
+    "ambiguity_level": "low"
+  },
+  "completed_steps": [
+    "web_research_stub",
+    "local_summarize",
+    "final_report"
+  ],
+  "pending_steps": [],
+  "findings": [
+    "Collected 1 web results.",
+    "Generated local summary during resume."
+  ],
+  "artifacts": [
+    "F:\\AI Agent\\ai_agent\\artifacts\\task_spec_20260323_005913.json",
+    "F:\\AI Agent\\ai_agent\\artifacts\\web\\openai.json",
+    "F:\\AI Agent\\ai_agent\\artifacts\\final_report_20260323_005913.md",
+    "F:\\AI Agent\\ai_agent\\artifacts\\final_report_resume_20260323_005913.md"
+  ],
+  "paused": false,
+  "pause_reason": null,
+  "approval_required": false,
+  "approval_context": {
+    "phase": "plan_step",
+    "action": "local_summarize",
+    "confidence": 0.85,
+    "reason": "tool_not_allowed",
+    "decision": "approved"
+  },
+  "last_action": "final_report",
+  "last_action_result": "completed",
+  "last_confidence": 0.9,
+  "failure_count": 0,
+  "final_status": "completed"
+}

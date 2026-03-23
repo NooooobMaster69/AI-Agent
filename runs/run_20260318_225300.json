@@ -1,0 +1,110 @@
+{
+  "task": "research OpenAI and summarize what the company does",
+  "task_spec": {
+    "user_goal": "Research OpenAI and summarize what the company does.",
+    "task_type": "business_research",
+    "must_do": [
+      "Use web research to gather current, reliable information about OpenAI",
+      "Summarize OpenAI's core products, services, and business focus",
+      "Keep the summary concise and factual"
+    ],
+    "must_not_do": [
+      "Do not speculate beyond publicly available information",
+      "Do not present unverified claims as facts",
+      "Do not include unrelated background unless it helps explain what the company does"
+    ],
+    "deliverables": [
+      "A short written summary of what OpenAI does",
+      "A brief mention of its main offerings and role in the AI industry"
+    ],
+    "allowed_tools": [
+      "web_research",
+      "browser",
+      "report_write"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "A concise summary of OpenAI has been produced",
+      "The summary clearly explains the company's purpose and main offerings",
+      "The information is based on current public sources"
+    ]
+  },
+  "plan": {
+    "goal": "Research OpenAI and produce a concise, factual summary of what the company does based on current public sources.",
+    "steps": [
+      {
+        "id": 1,
+        "action": "web_research_stub",
+        "reason": "Gather current, reliable public information about OpenAI's purpose, core products, services, and role in the AI industry."
+      },
+      {
+        "id": 2,
+        "action": "local_summarize",
+        "reason": "Synthesize the researched information into a short, factual summary focused on what the company does and its main offerings."
+      },
+      {
+        "id": 3,
+        "action": "final_report",
+        "reason": "Deliver the concise written summary with a brief mention of OpenAI's role in the AI industry."
+      }
+    ],
+    "done_when": [
+      "A concise summary of OpenAI has been produced",
+      "The summary clearly explains the company's purpose and main offerings",
+      "The information is based on current public sources"
+    ]
+  },
+  "state": {
+    "run_id": "20260318_225300",
+    "task": "research OpenAI and summarize what the company does",
+    "current_phase": "review",
+    "spec": {
+      "user_goal": "Research OpenAI and summarize what the company does.",
+      "task_type": "business_research",
+      "must_do": [
+        "Use web research to gather current, reliable information about OpenAI",
+        "Summarize OpenAI's core products, services, and business focus",
+        "Keep the summary concise and factual"
+      ],
+      "must_not_do": [
+        "Do not speculate beyond publicly available information",
+        "Do not present unverified claims as facts",
+        "Do not include unrelated background unless it helps explain what the company does"
+      ],
+      "deliverables": [
+        "A short written summary of what OpenAI does",
+        "A brief mention of its main offerings and role in the AI industry"
+      ],
+      "allowed_tools": [
+        "web_research",
+        "browser",
+        "report_write"
+      ],
+      "allowed_write_paths": [],
+      "risk_level": "low",
+      "done_when": [
+        "A concise summary of OpenAI has been produced",
+        "The summary clearly explains the company's purpose and main offerings",
+        "The information is based on current public sources"
+      ]
+    },
+    "completed_steps": [
+      "web_research_stub"
+    ],
+    "pending_steps": [
+      "local_summarize",
+      "final_report"
+    ],
+    "findings": [
+      "Collected 0 web results."
+    ],
+    "artifacts": [
+      "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json",
+      "F:\\AI Agent\\ai_agent\\artifacts\\web\\research_openai_and_summarize_what_the_company_does.json"
+    ],
+    "paused": true,
+    "pause_reason": "tool_not_allowed",
+    "final_status": "paused"
+  }
+}

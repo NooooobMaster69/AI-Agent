@@ -1,0 +1,100 @@
+{
+  "task": "inspect the project, then pause for review before the final report",
+  "task_spec": {
+    "user_goal": "Inspect the project, then pause for review before the final report.",
+    "task_type": "general_task",
+    "must_do": [
+      "Inspect the provided project files and identify the relevant implementation and tests.",
+      "Do not produce the final report yet; stop after the inspection stage and await review.",
+      "Summarize findings only at the inspection checkpoint if needed for handoff readiness."
+    ],
+    "must_not_do": [
+      "Do not modify any files.",
+      "Do not run destructive operations.",
+      "Do not provide the final report without explicit review/pause step completion."
+    ],
+    "deliverables": [
+      "An inspection checkpoint with key observations about the codebase.",
+      "A note indicating readiness to pause for review before final reporting."
+    ],
+    "allowed_tools": [
+      "filesystem_read",
+      "code_inspection"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "Project files have been inspected.",
+      "Relevant test and implementation files have been identified.",
+      "The process has paused for review before any final report is generated."
+    ]
+  },
+  "plan": {
+    "goal": "Inspect the project files, identify relevant implementation and tests, then pause for review before any final report.",
+    "steps": [
+      {
+        "id": 1,
+        "action": "local_summarize",
+        "reason": "Inspect the provided workspace to identify the implementation in project/src/main.py and the test in tests/test_main.py, and capture key observations for handoff readiness."
+      },
+      {
+        "id": 2,
+        "action": "pause_for_review",
+        "reason": "Stop after inspection and await confirmation before producing any final report."
+      }
+    ],
+    "done_when": [
+      "Project files have been inspected.",
+      "Relevant test and implementation files have been identified.",
+      "The process has paused for review before any final report is generated."
+    ]
+  },
+  "state": {
+    "run_id": "20260318_214410",
+    "task": "inspect the project, then pause for review before the final report",
+    "current_phase": "review",
+    "spec": {
+      "user_goal": "Inspect the project, then pause for review before the final report.",
+      "task_type": "general_task",
+      "must_do": [
+        "Inspect the provided project files and identify the relevant implementation and tests.",
+        "Do not produce the final report yet; stop after the inspection stage and await review.",
+        "Summarize findings only at the inspection checkpoint if needed for handoff readiness."
+      ],
+      "must_not_do": [
+        "Do not modify any files.",
+        "Do not run destructive operations.",
+        "Do not provide the final report without explicit review/pause step completion."
+      ],
+      "deliverables": [
+        "An inspection checkpoint with key observations about the codebase.",
+        "A note indicating readiness to pause for review before final reporting."
+      ],
+      "allowed_tools": [
+        "filesystem_read",
+        "code_inspection"
+      ],
+      "allowed_write_paths": [],
+      "risk_level": "low",
+      "done_when": [
+        "Project files have been inspected.",
+        "Relevant test and implementation files have been identified.",
+        "The process has paused for review before any final report is generated."
+      ]
+    },
+    "completed_steps": [
+      "local_summarize",
+      "pause_for_review"
+    ],
+    "pending_steps": [],
+    "findings": [
+      "Generated local summary."
+    ],
+    "artifacts": [
+      "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json"
+    ],
+    "paused": true,
+    "pause_reason": "manual_review_requested_by_plan",
+    "final_status": "paused"
+  }
+}

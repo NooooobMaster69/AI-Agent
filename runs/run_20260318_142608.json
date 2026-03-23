@@ -1,0 +1,24 @@
+{
+  "goal": "Inspect the project structure and create a concise task spec for the existing codebase.",
+  "steps": [
+    {
+      "id": 1,
+      "action": "inspect_workspace",
+      "reason": "Review source and test files to understand the implemented functionality and current coverage."
+    },
+    {
+      "id": 2,
+      "action": "local_summarize",
+      "reason": "Summarize the project purpose, behavior of add(), and any gaps or edge cases implied by the code and tests."
+    },
+    {
+      "id": 3,
+      "action": "final_report",
+      "reason": "Produce a short task spec with scope, expected behavior, and acceptance criteria."
+    }
+  ],
+  "done_when": [
+    "The project purpose and main function behavior are clearly identified.",
+    "A task spec is written with acceptance criteria aligned to the current tests and implementation."
+  ]
+}

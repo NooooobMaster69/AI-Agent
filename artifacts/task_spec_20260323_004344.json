@@ -1,0 +1,43 @@
+{
+  "user_goal": "Research OpenAI and summarize what the company does.",
+  "task_type": "business_research",
+  "must_do": [
+    "Research OpenAI using reliable public sources.",
+    "Summarize the company's main products, services, and mission in clear language.",
+    "Keep the summary concise and factual."
+  ],
+  "must_not_do": [
+    "Do not make unsupported claims.",
+    "Do not use private or non-public information.",
+    "Do not perform any external actions beyond research and summarization."
+  ],
+  "deliverables": [
+    "A short summary of what OpenAI does.",
+    "Optional brief bullet list of key offerings and focus areas."
+  ],
+  "requested_tools": [
+    "web_research",
+    "report_write"
+  ],
+  "approved_tools": [
+    "web_research",
+    "report_write"
+  ],
+  "allowed_tools": [
+    "web_research",
+    "report_write"
+  ],
+  "allowed_write_paths": [],
+  "risk_level": "low",
+  "done_when": [
+    "A concise, sourced summary of OpenAI's business and purpose is prepared.",
+    "The summary accurately reflects publicly available information."
+  ],
+  "requires_human_approval": false,
+  "has_external_side_effects": false,
+  "irreversible_action_possible": false,
+  "involves_credentials": false,
+  "involves_payment": false,
+  "involves_sensitive_data": false,
+  "ambiguity_level": "low"
+}

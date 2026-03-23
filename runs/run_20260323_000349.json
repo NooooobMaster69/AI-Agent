@@ -1,0 +1,153 @@
+{
+  "task": "research OpenAI and summarize what the company does",
+  "task_spec": {
+    "user_goal": "Research OpenAI and summarize what the company does",
+    "task_type": "business_research",
+    "must_do": [
+      "Research OpenAI using reliable public sources",
+      "Summarize the company's primary products, services, and mission",
+      "Keep the summary concise and factual"
+    ],
+    "must_not_do": [
+      "Do not speculate beyond available sources",
+      "Do not use private or non-public information",
+      "Do not take any actions on behalf of the user"
+    ],
+    "deliverables": [
+      "A short written summary of what OpenAI does"
+    ],
+    "requested_tools": [
+      "web_research",
+      "report_write",
+      "code_inspection"
+    ],
+    "approved_tools": [
+      "web_research",
+      "report_write",
+      "code_inspection"
+    ],
+    "allowed_tools": [
+      "web_research",
+      "report_write",
+      "code_inspection"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "The summary accurately describes OpenAI's purpose and main offerings",
+      "The response is based on public, reliable information"
+    ],
+    "requires_human_approval": false,
+    "has_external_side_effects": false,
+    "irreversible_action_possible": false,
+    "involves_credentials": false,
+    "involves_payment": false,
+    "involves_sensitive_data": false,
+    "ambiguity_level": "low"
+  },
+  "plan": {
+    "goal": "Research OpenAI and produce a concise, factual summary of what the company does using public reliable sources.",
+    "steps": [
+      {
+        "id": 1,
+        "action": "web_research_stub",
+        "reason": "Gather public, reliable information about OpenAI’s mission, primary products, and services from official and other authoritative sources."
+      },
+      {
+        "id": 2,
+        "action": "local_summarize",
+        "reason": "Draft a short factual summary based on the researched sources, keeping it concise and avoiding speculation."
+      },
+      {
+        "id": 3,
+        "action": "final_report",
+        "reason": "Provide the final written summary of what OpenAI does."
+      }
+    ],
+    "done_when": [
+      "The summary accurately describes OpenAI's purpose and main offerings",
+      "The response is based on public, reliable information"
+    ]
+  },
+  "state": {
+    "run_id": "20260323_000349",
+    "task": "research OpenAI and summarize what the company does",
+    "current_phase": "review",
+    "spec": {
+      "user_goal": "Research OpenAI and summarize what the company does",
+      "task_type": "business_research",
+      "must_do": [
+        "Research OpenAI using reliable public sources",
+        "Summarize the company's primary products, services, and mission",
+        "Keep the summary concise and factual"
+      ],
+      "must_not_do": [
+        "Do not speculate beyond available sources",
+        "Do not use private or non-public information",
+        "Do not take any actions on behalf of the user"
+      ],
+      "deliverables": [
+        "A short written summary of what OpenAI does"
+      ],
+      "requested_tools": [
+        "web_research",
+        "report_write",
+        "code_inspection"
+      ],
+      "approved_tools": [
+        "web_research",
+        "report_write",
+        "code_inspection"
+      ],
+      "allowed_tools": [
+        "web_research",
+        "report_write",
+        "code_inspection"
+      ],
+      "allowed_write_paths": [],
+      "risk_level": "low",
+      "done_when": [
+        "The summary accurately describes OpenAI's purpose and main offerings",
+        "The response is based on public, reliable information"
+      ],
+      "requires_human_approval": false,
+      "has_external_side_effects": false,
+      "irreversible_action_possible": false,
+      "involves_credentials": false,
+      "involves_payment": false,
+      "involves_sensitive_data": false,
+      "ambiguity_level": "low"
+    },
+    "completed_steps": [
+      "web_research_stub",
+      "local_summarize",
+      "final_report"
+    ],
+    "pending_steps": [],
+    "findings": [
+      "Collected 1 web results.",
+      "Generated local summary during resume."
+    ],
+    "artifacts": [
+      "F:\\AI Agent\\ai_agent\\artifacts\\task_spec_20260323_000349.json",
+      "F:\\AI Agent\\ai_agent\\artifacts\\web\\openai.json",
+      "F:\\AI Agent\\ai_agent\\artifacts\\final_report_resume_20260323_000349.md",
+      "F:\\AI Agent\\ai_agent\\artifacts\\final_report_resume_20260323_000349.md"
+    ],
+    "paused": false,
+    "pause_reason": null,
+    "approval_required": false,
+    "approval_context": {
+      "phase": "plan_step_resume",
+      "action": "local_summarize",
+      "confidence": 0.8,
+      "reason": "tool_not_allowed",
+      "decision": "approved"
+    },
+    "last_action": "final_report",
+    "last_action_result": "completed",
+    "last_confidence": 0.9,
+    "failure_count": 0,
+    "final_status": "completed"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "task": "research OpenAI and summarize what the company does",
+  "task_spec": {
+    "user_goal": "Research OpenAI and summarize what the company does.",
+    "task_type": "business_research",
+    "must_do": [
+      "Research OpenAI using reliable public sources",
+      "Summarize the company's core products, services, and mission",
+      "Keep the summary concise and factual",
+      "Distinguish between current offerings and general company description"
+    ],
+    "must_not_do": [
+      "Do not speculate beyond available sources",
+      "Do not provide investment advice or unsupported claims",
+      "Do not include unrelated company history unless relevant to what it does"
+    ],
+    "deliverables": [
+      "A concise written summary of OpenAI",
+      "Key points covering what the company does and how it is positioned"
+    ],
+    "allowed_tools": [
+      "browser",
+      "code_inspection",
+      "report_write",
+      "web_research"
+    ],
+    "allowed_write_paths": [
+      "/tmp",
+      "/workspace"
+    ],
+    "risk_level": "low",
+    "done_when": [
+      "A factual summary of OpenAI has been produced",
+      "The summary explains the company's main activities, products, and purpose",
+      "The response is based on researched sources and is concise"
+    ]
+  },
+  "plan": {
+    "goal": "Research OpenAI using reliable public sources and produce a concise, factual summary of what the company does, distinguishing current offerings from general description.",
+    "steps": [
+      {
+        "id": 1,
+        "action": "web_research_stub",
+        "reason": "Gather reliable public-source information about OpenAI’s mission, products, services, and current positioning."
+      },
+      {
+        "id": 2,
+        "action": "local_summarize",
+        "reason": "Condense the researched information into a concise summary that clearly separates current offerings from general company description."
+      },
+      {
+        "id": 3,
+        "action": "final_report",
+        "reason": "Deliver the factual summary of OpenAI’s main activities, products, and purpose."
+      }
+    ],
+    "done_when": [
+      "A factual summary of OpenAI has been produced",
+      "The summary explains the company's main activities, products, and purpose",
+      "The response is based on researched sources and is concise"
+    ]
+  },
+  "state": {
+    "run_id": "20260319_013303",
+    "task": "research OpenAI and summarize what the company does",
+    "current_phase": "review",
+    "spec": {
+      "user_goal": "Research OpenAI and summarize what the company does.",
+      "task_type": "business_research",
+      "must_do": [
+        "Research OpenAI using reliable public sources",
+        "Summarize the company's core products, services, and mission",
+        "Keep the summary concise and factual",
+        "Distinguish between current offerings and general company description"
+      ],
+      "must_not_do": [
+        "Do not speculate beyond available sources",
+        "Do not provide investment advice or unsupported claims",
+        "Do not include unrelated company history unless relevant to what it does"
+      ],
+      "deliverables": [
+        "A concise written summary of OpenAI",
+        "Key points covering what the company does and how it is positioned"
+      ],
+      "allowed_tools": [
+        "browser",
+        "code_inspection",
+        "report_write",
+        "web_research"
+      ],
+      "allowed_write_paths": [
+        "/tmp",
+        "/workspace"
+      ],
+      "risk_level": "low",
+      "done_when": [
+        "A factual summary of OpenAI has been produced",
+        "The summary explains the company's main activities, products, and purpose",
+        "The response is based on researched sources and is concise"
+      ]
+    },
+    "completed_steps": [
+      "web_research_stub",
+      "local_summarize",
+      "final_report"
+    ],
+    "pending_steps": [],
+    "findings": [
+      "Collected 1 web results.",
+      "Generated local summary."
+    ],
+    "artifacts": [
+      "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json",
+      "F:\\AI Agent\\ai_agent\\artifacts\\web\\openai.json"
+    ],
+    "paused": false,
+    "pause_reason": null,
+    "final_status": "completed"
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "task": "research OpenAI and summarize what the company does",
+  "task_spec": {
+    "user_goal": "Research OpenAI and summarize what the company does.",
+    "task_type": "business_research",
+    "must_do": [
+      "Research OpenAI using reliable public sources.",
+      "Summarize the company's core products, services, and mission.",
+      "Keep the summary concise and fact-based."
+    ],
+    "must_not_do": [
+      "Do not speculate beyond sourced information.",
+      "Do not include unsupported claims or rumors.",
+      "Do not modify any workspace files unless necessary for a report."
+    ],
+    "deliverables": [
+      "A concise written summary of OpenAI.",
+      "Optional key facts such as products, target users, and business focus."
+    ],
+    "allowed_tools": [
+      "browser",
+      "code_inspection",
+      "report_write",
+      "web_research"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "A clear summary of what OpenAI does has been produced.",
+      "The summary is based on reliable research sources and is factually grounded."
+    ]
+  },
+  "plan": {
+    "goal": "Research OpenAI and produce a concise, fact-based summary of what the company does using reliable public sources.",
+    "steps": [
+      {
+        "id": 1,
+        "action": "web_research_stub",
+        "reason": "Gather reliable public information about OpenAI’s mission, core products, services, and target users."
+      },
+      {
+        "id": 2,
+        "action": "browser_stub",
+        "reason": "Review OpenAI’s official website and other authoritative sources to verify facts and avoid unsupported claims."
+      },
+      {
+        "id": 3,
+        "action": "local_summarize",
+        "reason": "Condense the researched information into a concise written summary with optional key facts."
+      },
+      {
+        "id": 4,
+        "action": "final_report",
+        "reason": "Deliver the final fact-based summary of OpenAI."
+      }
+    ],
+    "done_when": [
+      "A clear summary of what OpenAI does has been produced.",
+      "The summary is based on reliable research sources and is factually grounded."
+    ]
+  },
+  "state": {
+    "run_id": "20260319_010658",
+    "task": "research OpenAI and summarize what the company does",
+    "current_phase": "review",
+    "spec": {
+      "user_goal": "Research OpenAI and summarize what the company does.",
+      "task_type": "business_research",
+      "must_do": [
+        "Research OpenAI using reliable public sources.",
+        "Summarize the company's core products, services, and mission.",
+        "Keep the summary concise and fact-based."
+      ],
+      "must_not_do": [
+        "Do not speculate beyond sourced information.",
+        "Do not include unsupported claims or rumors.",
+        "Do not modify any workspace files unless necessary for a report."
+      ],
+      "deliverables": [
+        "A concise written summary of OpenAI.",
+        "Optional key facts such as products, target users, and business focus."
+      ],
+      "allowed_tools": [
+        "browser",
+        "code_inspection",
+        "report_write",
+        "web_research"
+      ],
+      "allowed_write_paths": [],
+      "risk_level": "low",
+      "done_when": [
+        "A clear summary of what OpenAI does has been produced.",
+        "The summary is based on reliable research sources and is factually grounded."
+      ]
+    },
+    "completed_steps": [
+      "web_research_stub",
+      "browser_stub",
+      "local_summarize",
+      "final_report"
+    ],
+    "pending_steps": [],
+    "findings": [
+      "Collected 1 web results.",
+      "Browsed URL: https://openai.com",
+      "Generated local summary."
+    ],
+    "artifacts": [
+      "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json",
+      "F:\\AI Agent\\ai_agent\\artifacts\\web\\openai.json",
+      "F:\\AI Agent\\ai_agent\\artifacts\\browser\\https_openai_com.png",
+      "F:\\AI Agent\\ai_agent\\artifacts\\browser\\https_openai_com.txt"
+    ],
+    "paused": false,
+    "pause_reason": null,
+    "final_status": "completed"
+  }
+}

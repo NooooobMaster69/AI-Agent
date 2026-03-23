@@ -1,0 +1,118 @@
+{
+  "task": "research OpenAI and summarize what the company does",
+  "task_spec": {
+    "user_goal": "Research OpenAI and summarize what the company does.",
+    "task_type": "business_research",
+    "must_do": [
+      "Use web research to gather up-to-date, reliable information about OpenAI.",
+      "Summarize OpenAI’s core business, products, and main areas of activity.",
+      "Keep the summary concise and factual."
+    ],
+    "must_not_do": [
+      "Do not speculate beyond sourced information.",
+      "Do not include unsupported claims or rumors.",
+      "Do not write code or modify files unless needed for the report."
+    ],
+    "deliverables": [
+      "A concise written summary of what OpenAI does.",
+      "Optional brief bullets on key products/services and target users."
+    ],
+    "allowed_tools": [
+      "browser",
+      "code_inspection",
+      "report_write",
+      "web_research"
+    ],
+    "allowed_write_paths": [
+      "/tmp",
+      "/workspace"
+    ],
+    "risk_level": "low",
+    "done_when": [
+      "The summary clearly explains OpenAI’s purpose and major offerings.",
+      "Information is based on recent, reliable sources.",
+      "The final response is concise and free of unsupported claims."
+    ]
+  },
+  "plan": {
+    "goal": "Research OpenAI and summarize what the company does.",
+    "steps": [
+      {
+        "id": 1,
+        "action": "web_research_stub",
+        "reason": "The task requires up-to-date, reliable information about OpenAI from web sources."
+      },
+      {
+        "id": 2,
+        "action": "local_summarize",
+        "reason": "Condense sourced findings into a concise factual summary of OpenAI’s core business, products, and main areas of activity."
+      },
+      {
+        "id": 3,
+        "action": "final_report",
+        "reason": "Provide the brief written summary and optional bullets on key products/services and target users."
+      }
+    ],
+    "done_when": [
+      "The summary clearly explains OpenAI’s purpose and major offerings.",
+      "Information is based on recent, reliable sources.",
+      "The final response is concise and free of unsupported claims."
+    ]
+  },
+  "state": {
+    "run_id": "20260318_235757",
+    "task": "research OpenAI and summarize what the company does",
+    "current_phase": "review",
+    "spec": {
+      "user_goal": "Research OpenAI and summarize what the company does.",
+      "task_type": "business_research",
+      "must_do": [
+        "Use web research to gather up-to-date, reliable information about OpenAI.",
+        "Summarize OpenAI’s core business, products, and main areas of activity.",
+        "Keep the summary concise and factual."
+      ],
+      "must_not_do": [
+        "Do not speculate beyond sourced information.",
+        "Do not include unsupported claims or rumors.",
+        "Do not write code or modify files unless needed for the report."
+      ],
+      "deliverables": [
+        "A concise written summary of what OpenAI does.",
+        "Optional brief bullets on key products/services and target users."
+      ],
+      "allowed_tools": [
+        "browser",
+        "code_inspection",
+        "report_write",
+        "web_research"
+      ],
+      "allowed_write_paths": [
+        "/tmp",
+        "/workspace"
+      ],
+      "risk_level": "low",
+      "done_when": [
+        "The summary clearly explains OpenAI’s purpose and major offerings.",
+        "Information is based on recent, reliable sources.",
+        "The final response is concise and free of unsupported claims."
+      ]
+    },
+    "completed_steps": [
+      "web_research_stub",
+      "local_summarize",
+      "final_report"
+    ],
+    "pending_steps": [],
+    "findings": [
+      "Collected 8 web results.",
+      "Generated local summary."
+    ],
+    "artifacts": [
+      "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json",
+      "F:\\AI Agent\\ai_agent\\artifacts\\web\\openai.json"
+    ],
+    "paused": false,
+    "pause_reason": null,
+    "final_status": "completed"
+  }
+}

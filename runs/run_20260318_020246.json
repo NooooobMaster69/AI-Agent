@@ -1,0 +1,29 @@
+{
+  "goal": "Inspect the workspace, summarize the task, run available tests, and report the results concisely, including any missing files or missing tests if relevant.",
+  "steps": [
+    {
+      "id": 1,
+      "action": "inspect_workspace",
+      "reason": "Identify the files present and confirm the workspace contents relevant to the task."
+    },
+    {
+      "id": 2,
+      "action": "local_summarize",
+      "reason": "Summarize the main task from the brief and note any missing files or gaps in test coverage."
+    },
+    {
+      "id": 3,
+      "action": "run_tests",
+      "reason": "Execute the available tests to determine whether they pass."
+    },
+    {
+      "id": 4,
+      "action": "final_report",
+      "reason": "Provide a concise final report with the workspace summary, test outcome, and any missing items."
+    }
+  ],
+  "done_when": [
+    "The workspace contents and task are summarized concisely.",
+    "Test results are reported, including pass/fail status and any missing tests/files if applicable."
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "run_id": "20260318_225338",
+  "task": "research OpenAI and summarize what the company does",
+  "current_phase": "review",
+  "spec": {
+    "user_goal": "Research OpenAI and summarize what the company does.",
+    "task_type": "business_research",
+    "must_do": [
+      "Research OpenAI using reliable public sources.",
+      "Summarize the company's core products, services, and mission in plain language.",
+      "Keep the summary concise and factual."
+    ],
+    "must_not_do": [
+      "Do not speculate beyond sourced information.",
+      "Do not include unsupported claims or rumors.",
+      "Do not produce code or modify workspace files unless explicitly needed."
+    ],
+    "deliverables": [
+      "A concise written summary of what OpenAI does.",
+      "Key points on products/services and overall purpose."
+    ],
+    "allowed_tools": [
+      "web_research",
+      "browser",
+      "report_write"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "A concise summary of OpenAI has been produced.",
+      "The summary accurately describes OpenAI's main activities and purpose using public information."
+    ]
+  },
+  "completed_steps": [
+    "web_research_stub"
+  ],
+  "pending_steps": [
+    "local_summarize",
+    "final_report"
+  ],
+  "findings": [
+    "Collected 0 web results."
+  ],
+  "artifacts": [
+    "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json",
+    "F:\\AI Agent\\ai_agent\\artifacts\\web\\research_openai_and_summarize_what_the_company_does.json"
+  ],
+  "paused": false,
+  "pause_reason": null,
+  "final_status": "approved_waiting_resume",
+  "approval_required": false,
+  "last_action_result": "approved",
+  "approval_context": {
+    "decision": "approved"
+  }
+}

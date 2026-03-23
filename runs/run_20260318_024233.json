@@ -1,0 +1,29 @@
+{
+  "goal": "Inspect the workspace, run the test suite, fix any failing code if possible, and produce a final report.",
+  "steps": [
+    {
+      "id": 1,
+      "action": "inspect_workspace",
+      "reason": "Check the project structure and identify the source of any test failures."
+    },
+    {
+      "id": 2,
+      "action": "run_tests",
+      "reason": "Execute the tests to confirm failures and verify fixes."
+    },
+    {
+      "id": 3,
+      "action": "local_summarize",
+      "reason": "Apply a minimal code fix if needed and summarize the outcome."
+    },
+    {
+      "id": 4,
+      "action": "final_report",
+      "reason": "Report what was changed, test results, and any remaining issues."
+    }
+  ],
+  "done_when": [
+    "Tests pass successfully or the failure cause is clearly identified and fixed.",
+    "A concise final report summarizes the inspection, fix, and test outcome."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "goal": "Inspect the project structure and produce a concise task spec for the codebase.",
+  "steps": [
+    {
+      "id": 1,
+      "action": "inspect_workspace",
+      "reason": "Review the available source and test files to understand current functionality and scope."
+    },
+    {
+      "id": 2,
+      "action": "local_summarize",
+      "reason": "Summarize the project purpose, existing behavior, and any gaps or follow-up work implied by the files."
+    },
+    {
+      "id": 3,
+      "action": "final_report",
+      "reason": "Deliver a short task spec that captures what the project does and what should be done next."
+    }
+  ],
+  "done_when": [
+    "The main source and test files have been identified and understood.",
+    "A concise task spec summarizing the project and next actions is produced."
+  ]
+}

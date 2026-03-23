@@ -1,0 +1,47 @@
+{
+  "run_id": "20260318_134943",
+  "task": "inspect the project and create a task spec",
+  "current_phase": "review",
+  "spec": {
+    "user_goal": "Inspect the project and create a task spec for the current codebase, which appears to be a small Python package with a simple add function and a basic pytest test.",
+    "task_type": "general_task",
+    "must_do": [
+      "Inspect the visible project structure and files.",
+      "Create a conservative task specification based on the current codebase.",
+      "Keep the spec aligned to the existing simple Python add function and pytest test."
+    ],
+    "must_not_do": [
+      "Do not modify any files.",
+      "Do not assume hidden requirements beyond the provided files.",
+      "Do not include cache or pyc files as deliverables."
+    ],
+    "deliverables": [
+      "A JSON task spec describing the project and intended work.",
+      "A concise, practical scope based on the inspected files."
+    ],
+    "allowed_tools": [
+      "read-only file inspection"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "The task spec accurately reflects the small Python project.",
+      "The output is valid JSON matching the required schema.",
+      "No files have been changed."
+    ]
+  },
+  "completed_steps": [
+    "inspect_workspace",
+    "local_summarize"
+  ],
+  "pending_steps": [
+    "final_report"
+  ],
+  "findings": [
+    "Generated local summary."
+  ],
+  "artifacts": [],
+  "paused": false,
+  "pause_reason": null,
+  "final_status": "completed"
+}

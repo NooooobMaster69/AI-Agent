@@ -1,0 +1,50 @@
+{
+  "run_id": "20260318_212401",
+  "task": "inspect the project and create a task spec",
+  "current_phase": "review",
+  "spec": {
+    "user_goal": "Inspect the project structure and create a task specification based on the existing code and tests.",
+    "task_type": "code_task",
+    "must_do": [
+      "Inspect the repository contents, especially project/src/main.py and tests/test_main.py",
+      "Identify the current behavior of the add function and how it is covered by tests",
+      "Produce a concise task spec describing the implementation or verification objective",
+      "Base the spec on the observed project state rather than inventing unrelated requirements"
+    ],
+    "must_not_do": [
+      "Do not modify any files",
+      "Do not run tests unless explicitly needed for inspection",
+      "Do not include non-JSON output",
+      "Do not speculate beyond the visible project contents",
+      "Do not mention or rely on cache or pycache files as source-of-truth"
+    ],
+    "deliverables": [
+      "A JSON task specification with goal, task type, required actions, constraints, deliverables, allowed tools, allowed write paths, risk level, and completion criteria"
+    ],
+    "allowed_tools": [
+      "filesystem_read"
+    ],
+    "allowed_write_paths": [],
+    "risk_level": "low",
+    "done_when": [
+      "The task spec accurately reflects the add function and its test coverage",
+      "The output is valid JSON matching the requested schema",
+      "No files have been changed"
+    ]
+  },
+  "completed_steps": [
+    "inspect_workspace",
+    "local_summarize",
+    "final_report"
+  ],
+  "pending_steps": [],
+  "findings": [
+    "Generated local summary."
+  ],
+  "artifacts": [
+    "F:\\AI Agent\\ai_agent\\artifacts\\task_spec.json"
+  ],
+  "paused": false,
+  "pause_reason": null,
+  "final_status": "completed"
+}
