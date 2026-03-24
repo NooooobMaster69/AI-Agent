@@ -130,6 +130,17 @@ def show(run_id: str = typer.Argument(..., help="Run id, e.g. 20260323_014811"))
     print(f"[bold]Approval required:[/bold] {state.get('approval_required')}")
     print(f"[bold]Pending steps:[/bold] {state.get('pending_steps', [])}")
 
+    step_results = state.get("step_results", [])
+    preview = ""
+    for result in reversed(step_results):
+        if isinstance(result, dict) and result.get("status") == "completed":
+            preview = str(result.get("output_text", "")).strip()
+            if preview:
+                break
+
+    if preview:
+        print(f"[bold]Result preview:[/bold] {preview[:300]}")
+
 
 if __name__ == "__main__":
     app()

@@ -130,6 +130,23 @@ class OrchestratorV2:
         self._save_json(decision_path, decision_obj.model_dump())
         return decision_path
 
+    def _derive_result_text(self, state: RunState) -> str:
+        for result in reversed(state.step_results):
+            if not isinstance(result, dict):
+                continue
+            if result.get("status") != "completed":
+                continue
+            output_text = str(result.get("output_text", "")).strip()
+            if output_text:
+                return output_text
+        return ""
+
+    def _append_result_section(self, report_lines: list[str], state: RunState) -> None:
+        result_text = self._derive_result_text(state)
+        if not result_text:
+            return
+        report_lines += ["", "## Result", result_text]
+
     def _execute_plan_steps(
         self,
         *,
@@ -269,6 +286,7 @@ class OrchestratorV2:
                 start_index=0,
             )
 
+        self._append_result_section(report_lines, state)
         report_path = self._write_report(run_id, report_lines)
         state.artifacts.append(str(report_path))
 
@@ -339,6 +357,7 @@ class OrchestratorV2:
             start_index=start_index,
         )
 
+        self._append_result_section(report_lines, state)
         report_path = self._write_report(f"resume_{run_id}", report_lines, prefix="final_report_v2")
         state.artifacts.append(str(report_path))
 
