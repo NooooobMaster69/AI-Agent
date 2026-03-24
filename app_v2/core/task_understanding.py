@@ -102,6 +102,7 @@ def infer_task_spec(task: str) -> TaskSpecV2:
         task_family = "general"
         workflow_hint = "research_writing"
         requested_tools += ["web_research"]
+        needs_external_research = True
         deliverables = ["project plan", "summary"]
         deliverable_types = ["report"]
         success_criteria = [

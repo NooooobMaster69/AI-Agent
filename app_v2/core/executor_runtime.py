@@ -174,23 +174,41 @@ class ExecutorRuntime:
                 )
 
             if tool == "web_research":
-                research_data = research_query(goal)
-                serialized = str(research_data)
+                try:
+                    research_data = research_query(goal)
+                    serialized = str(research_data)
+                    summary = "Web research completed"
+                    confidence = 0.8
+                    findings = [f"Researched query: {goal}"]
+                except Exception as exc:
+                    research_data = {
+                        "query": goal,
+                        "fallback": [
+                            "Web search unavailable in this environment.",
+                            "Provide recommendations only; do not execute payment or checkout.",
+                            "Present candidate options with price range, ratings, and seller/shipping caveats.",
+                        ],
+                        "error": str(exc),
+                    }
+                    serialized = str(research_data)
+                    summary = "Web research unavailable; returned fallback guidance"
+                    confidence = 0.45
+                    findings = [f"Research fallback used for query: {goal}"]
                 obs = Observation(
                     source_type="web",
                     source_ref=goal,
-                    summary="Web research query completed",
+                    summary=summary,
                     content_excerpt=serialized[:1000],
-                    confidence=0.8,
+                    confidence=confidence,
                 )
                 return StepResult(
                     step_id=step_id,
                     step_kind=step_kind,
                     status="completed",
-                    summary="Web research completed",
+                    summary=summary,
                     output_text=serialized[:3000],
-                    findings=[f"Researched query: {goal}"],
-                    confidence=0.8,
+                    findings=findings,
+                    confidence=confidence,
                     raw_data={"tool": tool, "research": research_data, "observation": obs.model_dump(), "context": context},
                 )
 

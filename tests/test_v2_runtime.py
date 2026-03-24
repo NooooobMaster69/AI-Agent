@@ -4,6 +4,8 @@ from pathlib import Path
 from app_v2.core.cloud_arbitrator import CloudArbitrator
 from app_v2.core.executor_runtime import ExecutorRuntime
 from app_v2.core.orchestrator_v2 import OrchestratorV2
+from app_v2.core.task_understanding import infer_task_spec
+from app_v2.policies.permission_broker import approve_tools
 
 
 def test_noop_step_should_not_pause_on_tool_allowlist():
@@ -172,3 +174,36 @@ def test_final_report_uses_prior_outputs():
     assert "Final Draft" in result.output_text
     assert "Supporting Notes" in result.output_text
     assert "compare tea options" in result.output_text
+
+
+def test_general_task_enables_external_research():
+    spec = infer_task_spec("Find tea options on Amazon and suggest what to buy")
+    assert spec.workflow_hint == "research_writing"
+    assert spec.needs_external_research is True
+
+
+def test_high_risk_tool_approval_keeps_web_research():
+    spec = infer_task_spec("Search on Amazon and buy tea for me")
+    approved = approve_tools(spec.model_dump())
+    assert "web_research" in approved
+
+
+def test_web_research_fallback_when_provider_errors(monkeypatch):
+    runtime = ExecutorRuntime()
+
+    import app_v2.core.executor_runtime as runtime_mod
+
+    def _boom(_: str):
+        raise RuntimeError("network blocked")
+
+    monkeypatch.setattr(runtime_mod, "research_query", _boom)
+
+    result = runtime.execute_step(
+        step={"id": 4, "kind": "research", "tool": "web_research", "goal": "best tea on amazon"},
+        task_spec={"approved_tools": ["web_research"], "allowed_tools": ["web_research"]},
+        context={},
+    )
+
+    assert result.status == "completed"
+    assert "fallback guidance" in result.summary.lower()
+    assert "Web search unavailable" in result.output_text

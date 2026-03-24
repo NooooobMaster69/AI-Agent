@@ -24,7 +24,7 @@ PURCHASE_INTENT_KEYWORDS = {
     "下单",
 }
 
-SAFE_TOOLS = ["filesystem_read", "code_inspection", "report_write", "review"]
+SAFE_TOOLS = ["filesystem_read", "code_inspection", "web_research", "report_write", "review"]
 SAFE_PATHS = ["artifacts", "runs"]
 
 
