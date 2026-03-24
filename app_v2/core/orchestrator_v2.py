@@ -173,7 +173,11 @@ class OrchestratorV2:
             step_result = self.executor.execute_step(
                 step=step,
                 task_spec=task_spec,
-                context={"run_id": state.run_id},
+                context={
+                    "run_id": state.run_id,
+                    "task": state.task,
+                    "step_results": list(state.step_results),
+                },
             )
 
             state.step_results.append(step_result.model_dump())

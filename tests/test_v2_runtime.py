@@ -145,3 +145,30 @@ def test_cloud_arbitrator_force_cloud_without_key_falls_back(tmp_path: Path):
     decision = arbitrator.decide_from_pause_packet(packet_path, mode="force_cloud")
 
     assert decision.rationale.startswith("[forced_cloud_unavailable_fallback]")
+
+
+def test_final_report_uses_prior_outputs():
+    runtime = ExecutorRuntime()
+
+    result = runtime.execute_step(
+        step={
+            "id": 6,
+            "kind": "final_report",
+            "tool": "report_write",
+            "goal": "Assemble a coherent final draft.",
+        },
+        task_spec={"approved_tools": ["report_write"], "allowed_tools": ["report_write"]},
+        context={
+            "run_id": "20260324_104413",
+            "task": "Search on Amazon and buy tea for me",
+            "step_results": [
+                {"status": "completed", "output_text": "Outline: compare tea options by price and rating."},
+                {"status": "completed", "output_text": "Research: list sellers and shipping windows."},
+            ],
+        },
+    )
+
+    assert result.status == "completed"
+    assert "Final Draft" in result.output_text
+    assert "Supporting Notes" in result.output_text
+    assert "compare tea options" in result.output_text

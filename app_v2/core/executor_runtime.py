@@ -31,6 +31,33 @@ TOOL_TO_ACTION = {
 
 
 class ExecutorRuntime:
+    def _collect_prior_outputs(self, context: dict) -> list[str]:
+        outputs: list[str] = []
+        for result in context.get("step_results", []):
+            if not isinstance(result, dict):
+                continue
+            if result.get("status") != "completed":
+                continue
+            text = str(result.get("output_text", "")).strip()
+            if text:
+                outputs.append(text)
+        return outputs
+
+    def _build_report_text(self, *, step_kind: str, goal: str, context: dict) -> str:
+        prior_outputs = self._collect_prior_outputs(context)
+
+        if step_kind == "final_report":
+            lines = ["# Final Draft", "", f"Goal: {goal}"]
+            if prior_outputs:
+                lines += ["", "## Supporting Notes"]
+                for idx, text in enumerate(prior_outputs[-4:], start=1):
+                    lines += ["", f"### Note {idx}", text]
+            else:
+                lines += ["", "## Supporting Notes", "No prior notes were available."]
+            return "\n".join(lines).strip()
+
+        return f"{step_kind.replace('_', ' ').title()} Notes:\n{goal}"
+
     def _pause_if_needed(self, step: dict, task_spec: dict) -> tuple[bool, str | None]:
         step_kind = step.get("kind", "unknown")
         tool = step.get("tool", "none")
@@ -87,7 +114,7 @@ class ExecutorRuntime:
                 )
 
             if tool == "report_write":
-                report_text = f"REPORT STEP: {goal}"
+                report_text = self._build_report_text(step_kind=step_kind, goal=goal, context=context)
                 obs = Observation(
                     source_type="model",
                     source_ref=step_kind,
