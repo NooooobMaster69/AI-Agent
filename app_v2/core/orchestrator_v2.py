@@ -15,7 +15,7 @@ from app_v2.workflows.multimedia_project import MultimediaProjectWorkflow
 from app_v2.state.run_state import RunState
 from app_v2.policies.permission_broker import approve_tools
 from app_v2.policies.risk_policy import should_pause_for_goal
-
+from app_v2.core.executor_runtime import ExecutorRuntime
 
 RUNS_DIR = Path("runs")
 ARTIFACTS_DIR = Path("artifacts")
@@ -23,6 +23,7 @@ ARTIFACTS_DIR = Path("artifacts")
 
 class OrchestratorV2:
     def __init__(self) -> None:
+        self.executor = ExecutorRuntime()
         self.workflow_map = {
             "operations_execution": OperationsExecutionWorkflow(),
             "research_writing": ResearchWritingWorkflow(),
@@ -61,7 +62,43 @@ class OrchestratorV2:
 
         context = {}
         plan = workflow.build_plan(task_spec, context)
+        first_step_result = None
 
+        if not should_block and plan:
+            for step in plan:
+                state.current_step_id = str(step["id"])
+                state.current_step_kind = step["kind"]
+
+                result = self.executor.execute_step(
+                    step=step,
+                    task_spec=task_spec.model_dump(),
+                    context={},
+                )
+
+                state.step_results.append(result.model_dump())
+                state.last_action = step["kind"]
+                state.last_action_result = result.summary
+                state.last_confidence = result.confidence
+
+                if result.status == "completed":
+                    state.completed_steps.append(step["kind"])
+                    if step["kind"] in state.pending_steps:
+                        state.pending_steps.remove(step["kind"])
+                    state.findings.extend(result.findings)
+                    state.artifacts.extend(result.artifacts)
+
+                elif result.status == "paused":
+                    state.paused = True
+                    state.approval_required = True
+                    state.pause_reason = result.pause_reason
+                    state.final_status = "paused"
+                    break
+
+                else:
+                    state.failure_count += 1
+                    if state.failure_count >= 2:
+                        state.final_status = "failed"
+                        break
         state = RunState(
             run_id=run_id,
             task=task,
@@ -119,34 +156,33 @@ class OrchestratorV2:
         return report_path
 
     def resume_run(self, run_id: str) -> Path:
-        path = self._run_json_path(run_id)
-        if not path.exists():
-            raise FileNotFoundError(f"Run file not found: {path}")
+        completed = set(state.get("completed_steps", []))
+        plan = payload.get("plan", [])
 
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        state = payload.get("state", {})
-        task = payload.get("task", "")
-        workflow_name = payload.get("workflow", "unknown")
+        remaining_steps = [step for step in plan if step["kind"] not in completed]
 
-        report_lines = [
-            "# V2 Resume Report",
-            "",
-            f"- Run ID: {run_id}",
-            f"- Task: {task}",
-            f"- Workflow: {workflow_name}",
-            "",
-            "Resume behavior is not fully implemented yet.",
-            "This confirms the v2 pipeline is wired correctly.",
-        ]
+        for step in remaining_steps:
+            result = self.executor.execute_step(
+                step=step,
+                task_spec=payload.get("task_spec", {}),
+                context={},
+            )
 
-        report_path = self._write_report(f"resume_{run_id}", report_lines)
+            state.setdefault("step_results", []).append(result.model_dump())
+            state["last_action"] = step["kind"]
+            state["last_action_result"] = result.summary
+            state["last_confidence"] = result.confidence
 
-        state["paused"] = False
-        state["approval_required"] = False
-        state["pause_reason"] = None
-        state["final_status"] = "resumed_stub"
-        state.setdefault("artifacts", []).append(str(report_path))
-
-        payload["state"] = state
-        self._save_json(path, payload)
-        return report_path
+            if result.status == "completed":
+                state.setdefault("completed_steps", []).append(step["kind"])
+                if step["kind"] in state.get("pending_steps", []):
+                    state["pending_steps"].remove(step["kind"])
+            elif result.status == "paused":
+                state["paused"] = True
+                state["approval_required"] = True
+                state["pause_reason"] = result.pause_reason
+                state["final_status"] = "paused"
+                break
+            else:
+                state["failure_count"] = state.get("failure_count", 0) + 1
+                break
