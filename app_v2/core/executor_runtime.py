@@ -19,11 +19,30 @@ STEP_KIND_TO_ACTION = {
     "test": "run_tests",
 }
 
+TOOL_TO_ACTION = {
+    "filesystem_read": "inspect_workspace",
+    "code_inspection": "local_summarize",
+    "run_tests": "run_tests",
+    "web_research": "web_research_stub",
+    "browser": "browser_stub",
+    "report_write": "final_report",
+    "write_files": "production_write",
+}
+
 
 class ExecutorRuntime:
     def _pause_if_needed(self, step: dict, task_spec: dict) -> tuple[bool, str | None]:
         step_kind = step.get("kind", "unknown")
-        action = STEP_KIND_TO_ACTION.get(step_kind, step_kind)
+        tool = step.get("tool", "none")
+
+        # no-op steps should not be blocked by tool checks
+        if tool == "none":
+            return False, None
+
+        action = TOOL_TO_ACTION.get(tool)
+        if action is None:
+            action = STEP_KIND_TO_ACTION.get(step_kind, step_kind)
+
         return should_pause(action=action, confidence=1.0, context={"task_spec": task_spec})
 
     def execute_step(self, step: dict, task_spec: dict, context: dict | None = None) -> StepResult:
