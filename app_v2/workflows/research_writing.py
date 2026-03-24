@@ -5,12 +5,15 @@ class ResearchWritingWorkflow(BaseWorkflow):
     name = "research_writing"
 
     def build_plan(self, task_spec, context: dict) -> list[dict]:
+        user_goal = getattr(task_spec, "user_goal", "").strip()
+        scoped_goal = user_goal or "the assigned task"
+
         steps = [
             {
                 "id": 1,
                 "kind": "understand_requirements",
                 "tool": "none",
-                "goal": "Extract the assignment goals, constraints, and deliverables.",
+                "goal": f"Extract the assignment goals, constraints, and deliverables for: {scoped_goal}",
                 "requires_approval": False,
             },
             {
@@ -24,28 +27,28 @@ class ResearchWritingWorkflow(BaseWorkflow):
                 "id": 3,
                 "kind": "outline",
                 "tool": "report_write",
-                "goal": "Generate an outline and section plan.",
+                "goal": f"Generate an outline and section plan for: {scoped_goal}",
                 "requires_approval": False,
             },
             {
                 "id": 4,
                 "kind": "research",
                 "tool": "web_research" if task_spec.needs_external_research else "none",
-                "goal": "Collect supporting facts, benchmarks, and references.",
+                "goal": f"Collect supporting facts, options, prices, and references for: {scoped_goal}",
                 "requires_approval": False,
             },
             {
                 "id": 5,
                 "kind": "draft_sections",
                 "tool": "report_write",
-                "goal": "Draft section-by-section content.",
+                "goal": "Draft section-by-section content with concrete suggestions and caveats.",
                 "requires_approval": False,
             },
             {
                 "id": 6,
                 "kind": "final_report",
                 "tool": "report_write",
-                "goal": "Assemble a coherent final draft.",
+                "goal": "Assemble a coherent final draft with recommendations only (no transactions).",
                 "requires_approval": False,
             },
         ]
