@@ -101,12 +101,12 @@ class OrchestratorV2:
         if decision.decision == "stop":
             state.final_status = "stopped_by_resume_decision"
 
-    def generate_resume_decision(self, run_id: str) -> Path:
+    def generate_resume_decision(self, run_id: str, mode: str = "auto") -> Path:
         pause_path = self._pause_packet_path(run_id)
         if not pause_path.exists():
             raise FileNotFoundError(f"Pause packet not found: {pause_path}")
 
-        decision = self.arbitrator.decide_from_pause_packet(pause_path)
+        decision = self.arbitrator.decide_from_pause_packet(pause_path, mode=mode)
         decision_path = self._resume_decision_path(run_id)
         self._save_json(decision_path, decision.model_dump())
         return decision_path

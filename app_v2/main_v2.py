@@ -71,10 +71,22 @@ def resume(run_id: str = typer.Argument(..., help="Run id, e.g. 20260323_014811"
 
 
 @app.command()
-def decide(run_id: str = typer.Argument(..., help="Run id, e.g. 20260323_014811")):
+def decide(
+    run_id: str = typer.Argument(..., help="Run id, e.g. 20260323_014811"),
+    force_local: bool = typer.Option(False, help="Force local rule-based arbitration"),
+    force_cloud: bool = typer.Option(False, help="Force cloud arbitration when API key is configured"),
+):
+    mode = "auto"
+    if force_local and force_cloud:
+        raise typer.BadParameter("Choose only one of --force-local or --force-cloud")
+    if force_local:
+        mode = "force_local"
+    elif force_cloud:
+        mode = "force_cloud"
+
     agent = OrchestratorV2()
-    decision = agent.generate_resume_decision(run_id)
-    print(f"[green]Decision generated.[/green] Resume decision saved to: {decision}")
+    decision = agent.generate_resume_decision(run_id, mode=mode)
+    print(f"[green]Decision generated.[/green] Resume decision saved to: {decision} (mode={mode})")
 
 
 
