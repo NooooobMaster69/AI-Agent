@@ -165,15 +165,18 @@ def test_final_report_uses_prior_outputs():
             "task": "Search on Amazon and buy tea for me",
             "step_results": [
                 {"status": "completed", "output_text": "Outline: compare tea options by price and rating."},
-                {"status": "completed", "output_text": "Research: list sellers and shipping windows."},
+                {
+                    "status": "completed",
+                    "output_text": "## Research Notes\n1. Tea Option A\n   - URL: https://example.com/a",
+                },
             ],
         },
     )
 
     assert result.status == "completed"
-    assert "Final Draft" in result.output_text
-    assert "Supporting Notes" in result.output_text
-    assert "compare tea options" in result.output_text
+    assert "Final Recommendation" in result.output_text
+    assert "Suggested Options" in result.output_text
+    assert "Tea Option A" in result.output_text
 
 
 def test_general_task_enables_external_research():
@@ -206,4 +209,34 @@ def test_web_research_fallback_when_provider_errors(monkeypatch):
 
     assert result.status == "completed"
     assert "fallback guidance" in result.summary.lower()
-    assert "Web search unavailable" in result.output_text
+    assert "No web results were returned." in result.output_text
+
+
+def test_web_research_retries_with_task_context(monkeypatch):
+    runtime = ExecutorRuntime()
+
+    import app_v2.core.executor_runtime as runtime_mod
+
+    calls: list[str] = []
+
+    def _research(query: str):
+        calls.append(query)
+        if len(calls) == 1:
+            return {"query": query, "engine": "mock", "results": []}
+        return {
+            "query": query,
+            "engine": "mock",
+            "results": [{"title": "Top Air Purifier", "url": "https://example.com/ap", "snippet": "good CADR"}],
+        }
+
+    monkeypatch.setattr(runtime_mod, "research_query", _research)
+
+    result = runtime.execute_step(
+        step={"id": 4, "kind": "research", "tool": "web_research", "goal": "too generic query"},
+        task_spec={"approved_tools": ["web_research"], "allowed_tools": ["web_research"]},
+        context={"task": "Search on Amazon give me recommendation on air purifier"},
+    )
+
+    assert result.status == "completed"
+    assert "1 sources" in result.summary
+    assert "Top Air Purifier" in result.output_text

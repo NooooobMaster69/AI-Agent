@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from app_v2.policies.risk_policy import should_pause
 from app_v2.schemas.observation import Observation
 from app_v2.schemas.step_result import StepResult
@@ -31,6 +33,78 @@ TOOL_TO_ACTION = {
 
 
 class ExecutorRuntime:
+    def _extract_research_sources(self, prior_outputs: list[str]) -> list[dict]:
+        sources: list[dict] = []
+        current: dict | None = None
+
+        for text in prior_outputs:
+            for line in text.splitlines():
+                row = line.strip()
+                if not row:
+                    continue
+
+                match = re.match(r"^\d+\.\s+(.+)$", row)
+                if match:
+                    title = match.group(1).strip()
+                    current = {"title": title, "url": ""}
+                    sources.append(current)
+                    continue
+
+                if row.startswith("- URL:") and current is not None:
+                    current["url"] = row.replace("- URL:", "", 1).strip()
+
+        return sources
+
+    def _format_research_output(self, research_data: dict) -> str:
+        query = str(research_data.get("query", "")).strip()
+        engine = str(research_data.get("engine", "")).strip()
+        results = research_data.get("results", [])
+
+        lines = ["## Research Notes"]
+        if query:
+            lines.append(f"- Query: {query}")
+        if engine:
+            lines.append(f"- Engine: {engine}")
+
+        if isinstance(results, list) and results:
+            lines += ["", "### Candidate Sources"]
+            for idx, item in enumerate(results[:5], start=1):
+                if not isinstance(item, dict):
+                    continue
+                title = str(item.get("title", "Untitled")).strip()
+                url = str(item.get("url", "")).strip()
+                snippet = str(item.get("snippet", "")).strip()
+                lines.append(f"{idx}. {title}")
+                if url:
+                    lines.append(f"   - URL: {url}")
+                if snippet:
+                    lines.append(f"   - Note: {snippet[:280]}")
+        else:
+            lines += [
+                "",
+                "### Candidate Sources",
+                "No web results were returned.",
+                "- Try broader keywords (brand/product/category).",
+                "- Try a different network/proxy and rerun.",
+            ]
+
+        return "\n".join(lines).strip()
+
+    def _run_research_with_retry(self, goal: str, context: dict) -> dict:
+        candidate_queries = [goal]
+
+        task_text = str(context.get("task", "")).strip()
+        if task_text and task_text not in candidate_queries:
+            candidate_queries.append(task_text)
+
+        for query in candidate_queries:
+            payload = research_query(query)
+            results = payload.get("results", [])
+            if isinstance(results, list) and results:
+                return payload
+
+        return payload
+
     def _collect_prior_outputs(self, context: dict) -> list[str]:
         outputs: list[str] = []
         for result in context.get("step_results", []):
@@ -47,13 +121,41 @@ class ExecutorRuntime:
         prior_outputs = self._collect_prior_outputs(context)
 
         if step_kind == "final_report":
-            lines = ["# Final Draft", "", f"Goal: {goal}"]
-            if prior_outputs:
-                lines += ["", "## Supporting Notes"]
-                for idx, text in enumerate(prior_outputs[-4:], start=1):
-                    lines += ["", f"### Note {idx}", text]
+            task = str(context.get("task", "")).strip()
+            sources = self._extract_research_sources(prior_outputs)
+
+            lines = [
+                "# Final Recommendation",
+                "",
+                f"Task: {task or goal}",
+                "",
+                "## Safety Boundaries",
+                "- Recommendation only. No payment, checkout, or account operations were executed.",
+                "",
+                "## Suggested Options",
+            ]
+
+            if sources:
+                for idx, source in enumerate(sources[:5], start=1):
+                    title = source.get("title", "").strip() or "Candidate option"
+                    url = source.get("url", "").strip()
+                    lines.append(f"{idx}. {title}")
+                    if url:
+                        lines.append(f"   - Link: {url}")
             else:
-                lines += ["", "## Supporting Notes", "No prior notes were available."]
+                lines += [
+                    "- No reliable product sources were returned by the search provider in this run.",
+                    "- Please rerun with stable network or narrower query (brand + model + budget).",
+                ]
+
+            lines += [
+                "",
+                "## Quick Buying Checklist",
+                "- Confirm room size coverage (CADR / square footage).",
+                "- Compare filter type and replacement cost.",
+                "- Check seller credibility, warranty, and return policy.",
+            ]
+
             return "\n".join(lines).strip()
 
         return f"{step_kind.replace('_', ' ').title()} Notes:\n{goal}"
@@ -175,9 +277,13 @@ class ExecutorRuntime:
 
             if tool == "web_research":
                 try:
-                    research_data = research_query(goal)
-                    serialized = str(research_data)
-                    summary = "Web research completed"
+                    research_data = self._run_research_with_retry(goal, context)
+                    serialized = self._format_research_output(research_data)
+                    result_count = len(research_data.get("results", []) or [])
+                    if result_count:
+                        summary = f"Web research completed ({result_count} sources)"
+                    else:
+                        summary = "Web research completed but returned no sources"
                     confidence = 0.8
                     findings = [f"Researched query: {goal}"]
                 except Exception as exc:
@@ -190,7 +296,7 @@ class ExecutorRuntime:
                         ],
                         "error": str(exc),
                     }
-                    serialized = str(research_data)
+                    serialized = self._format_research_output(research_data)
                     summary = "Web research unavailable; returned fallback guidance"
                     confidence = 0.45
                     findings = [f"Research fallback used for query: {goal}"]
