@@ -12,8 +12,17 @@ class RunState(BaseModel):
     completed_steps: List[str] = Field(default_factory=list)
     pending_steps: List[str] = Field(default_factory=list)
 
+    completed_step_ids: List[str] = Field(default_factory=list)
+    pending_step_ids: List[str] = Field(default_factory=list)
+
     findings: List[str] = Field(default_factory=list)
     artifacts: List[str] = Field(default_factory=list)
+
+    step_results: List[Dict[str, Any]] = Field(default_factory=list)
+    observations: List[Dict[str, Any]] = Field(default_factory=list)
+
+    current_step_id: Optional[str] = None
+    current_step_kind: Optional[str] = None
 
     paused: bool = False
     pause_reason: Optional[str] = None

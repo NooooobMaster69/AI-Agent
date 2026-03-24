@@ -14,6 +14,7 @@ ALLOWED_TOOL_NAMES = {
 BASE_SAFE_TOOLS = {
     "filesystem_read",
     "code_inspection",
+    "web_research",
     "report_write",
 }
 
@@ -41,6 +42,7 @@ RISK_TOOL_MATRIX = {
     "high": {
         "filesystem_read",
         "code_inspection",
+        "web_research",
         "review",
         "report_write",
     },
