@@ -111,6 +111,25 @@ class OrchestratorV2:
         self._save_json(decision_path, decision.model_dump())
         return decision_path
 
+    def set_resume_decision(
+        self,
+        run_id: str,
+        decision: str,
+        rationale: str = "",
+        allowed_tools: list[str] | None = None,
+        allowed_write_paths: list[str] | None = None,
+    ) -> Path:
+        decision_obj = ResumeDecision(
+            run_id=run_id,
+            decision=decision,  # type: ignore[arg-type]
+            rationale=rationale,
+            updated_allowed_tools=allowed_tools or [],
+            updated_allowed_write_paths=allowed_write_paths or [],
+        )
+        decision_path = self._resume_decision_path(run_id)
+        self._save_json(decision_path, decision_obj.model_dump())
+        return decision_path
+
     def _execute_plan_steps(
         self,
         *,

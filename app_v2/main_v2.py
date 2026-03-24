@@ -1,6 +1,7 @@
 import importlib
 import json
 from pathlib import Path
+from typing import Optional
 
 import typer
 from rich import print
@@ -74,6 +75,33 @@ def decide(run_id: str = typer.Argument(..., help="Run id, e.g. 20260323_014811"
     agent = OrchestratorV2()
     decision = agent.generate_resume_decision(run_id)
     print(f"[green]Decision generated.[/green] Resume decision saved to: {decision}")
+
+
+
+
+def _csv_to_list(value: Optional[str]) -> list[str]:
+    if not value:
+        return []
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+
+@app.command()
+def approve(
+    run_id: str = typer.Argument(..., help="Run id, e.g. 20260323_014811"),
+    decision: str = typer.Option("continue_with_limits", help="continue | continue_with_limits | ask_human | stop"),
+    rationale: str = typer.Option("", help="Human rationale for approval decision"),
+    tools: Optional[str] = typer.Option(None, help="Comma-separated allowed tools"),
+    write_paths: Optional[str] = typer.Option(None, help="Comma-separated allowed write paths"),
+):
+    agent = OrchestratorV2()
+    decision_path = agent.set_resume_decision(
+        run_id=run_id,
+        decision=decision,
+        rationale=rationale,
+        allowed_tools=_csv_to_list(tools),
+        allowed_write_paths=_csv_to_list(write_paths),
+    )
+    print(f"[green]Human decision saved.[/green] Resume decision saved to: {decision_path}")
 
 
 @app.command()
