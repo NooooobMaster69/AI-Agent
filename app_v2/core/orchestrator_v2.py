@@ -4,11 +4,14 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+from app_v2.core.cloud_arbitrator import CloudArbitrator
 from app_v2.core.executor_runtime import ExecutorRuntime
 from app_v2.core.task_understanding import infer_task_spec
 from app_v2.core.workflow_router import select_workflow
 from app_v2.policies.permission_broker import approve_tools
 from app_v2.policies.risk_policy import should_pause_for_goal
+from app_v2.schemas.pause_packet import PausePacket
+from app_v2.schemas.resume_decision import ResumeDecision
 from app_v2.state.run_state import RunState
 from app_v2.workflows.coding_project import CodingProjectWorkflow
 from app_v2.workflows.multimedia_project import MultimediaProjectWorkflow
@@ -29,9 +32,16 @@ class OrchestratorV2:
             "multimedia_project": MultimediaProjectWorkflow(),
         }
         self.executor = ExecutorRuntime()
+        self.arbitrator = CloudArbitrator()
 
     def _run_json_path(self, run_id: str) -> Path:
         return RUNS_DIR / f"run_{run_id}.json"
+
+    def _pause_packet_path(self, run_id: str) -> Path:
+        return ARTIFACTS_DIR / f"pause_packet_v2_{run_id}.json"
+
+    def _resume_decision_path(self, run_id: str) -> Path:
+        return ARTIFACTS_DIR / f"resume_decision_v2_{run_id}.json"
 
     def _save_json(self, path: Path, payload: dict) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -42,6 +52,64 @@ class OrchestratorV2:
         report_path = ARTIFACTS_DIR / f"{prefix}_{run_id}.md"
         report_path.write_text("\n".join(lines), encoding="utf-8")
         return report_path
+
+    def _build_pause_packet(self, state: RunState) -> PausePacket:
+        packet = PausePacket(
+            run_id=state.run_id,
+            reason=state.pause_reason or "unknown",
+            current_step_id=state.current_step_id or "",
+            current_step_kind=state.current_step_kind or "",
+            task=state.task,
+            recent_findings=state.findings[-8:],
+            recent_artifacts=state.artifacts[-8:],
+            recent_step_results=state.step_results[-8:],
+            question_for_cloud="Should execution continue? If yes, what limits should be applied?",
+            decision_path=str(self._resume_decision_path(state.run_id)),
+        )
+        return packet
+
+    def _save_pause_packet(self, state: RunState) -> Path:
+        packet = self._build_pause_packet(state)
+        path = self._pause_packet_path(state.run_id)
+        self._save_json(path, packet.model_dump())
+        state.approval_context["pause_packet_path"] = str(path)
+        return path
+
+    def _load_resume_decision(self, run_id: str) -> ResumeDecision | None:
+        path = self._resume_decision_path(run_id)
+        if not path.exists():
+            return None
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        return ResumeDecision(**payload)
+
+    def _apply_resume_decision(self, decision: ResumeDecision, task_spec: dict, state: RunState) -> None:
+        state.approval_context["resume_decision"] = decision.model_dump()
+
+        if decision.updated_allowed_tools:
+            task_spec["allowed_tools"] = list(dict.fromkeys(decision.updated_allowed_tools))
+            task_spec["approved_tools"] = list(dict.fromkeys(decision.updated_allowed_tools))
+
+        if decision.updated_allowed_write_paths:
+            task_spec["allowed_write_paths"] = list(dict.fromkeys(decision.updated_allowed_write_paths))
+
+        if decision.decision == "ask_human":
+            state.paused = True
+            state.approval_required = True
+            state.pause_reason = "resume_decision_requires_human"
+            state.final_status = "paused"
+
+        if decision.decision == "stop":
+            state.final_status = "stopped_by_resume_decision"
+
+    def generate_resume_decision(self, run_id: str) -> Path:
+        pause_path = self._pause_packet_path(run_id)
+        if not pause_path.exists():
+            raise FileNotFoundError(f"Pause packet not found: {pause_path}")
+
+        decision = self.arbitrator.decide_from_pause_packet(pause_path)
+        decision_path = self._resume_decision_path(run_id)
+        self._save_json(decision_path, decision.model_dump())
+        return decision_path
 
     def _execute_plan_steps(
         self,
@@ -103,6 +171,10 @@ class OrchestratorV2:
                 state.approval_required = True
                 state.pause_reason = step_result.pause_reason
                 state.final_status = "paused"
+
+                pause_packet_path = self._save_pause_packet(state)
+                state.artifacts.append(str(pause_packet_path))
+                report_lines.append(f"- Pause packet saved: {pause_packet_path}")
                 return
 
             state.failure_count += 1
@@ -166,6 +238,9 @@ class OrchestratorV2:
 
         if should_block:
             report_lines += ["", "## Status", f"Run paused at goal gate: `{pause_reason}`"]
+            pause_packet_path = self._save_pause_packet(state)
+            state.artifacts.append(str(pause_packet_path))
+            report_lines.append(f"- Pause packet saved: {pause_packet_path}")
         else:
             self._execute_plan_steps(
                 plan=plan,
@@ -196,12 +271,36 @@ class OrchestratorV2:
 
         payload = json.loads(path.read_text(encoding="utf-8"))
         plan = payload.get("plan", [])
+        task_spec = payload.get("task_spec", {})
 
         state = RunState(**(payload.get("state", {})))
         state.paused = False
         state.approval_required = False
         state.pause_reason = None
         state.final_status = "running"
+
+        decision = self._load_resume_decision(run_id)
+
+        report_lines = [
+            "# V2 Resume Report",
+            "",
+            f"- Run ID: {run_id}",
+            f"- Task: {state.task}",
+            f"- Workflow: {payload.get('workflow', 'unknown')}",
+        ]
+
+        if decision:
+            report_lines.append(f"- Resume decision: {decision.decision}")
+            report_lines.append(f"- Rationale: {decision.rationale}")
+            self._apply_resume_decision(decision, task_spec, state)
+
+            if state.final_status in {"paused", "stopped_by_resume_decision"}:
+                report_path = self._write_report(f"resume_{run_id}", report_lines, prefix="final_report_v2")
+                state.artifacts.append(str(report_path))
+                payload["task_spec"] = task_spec
+                payload["state"] = state.model_dump()
+                self._save_json(path, payload)
+                return report_path
 
         completed_step_ids = set(state.completed_step_ids)
         start_index = 0
@@ -211,18 +310,11 @@ class OrchestratorV2:
             else:
                 break
 
-        report_lines = [
-            "# V2 Resume Report",
-            "",
-            f"- Run ID: {run_id}",
-            f"- Task: {state.task}",
-            f"- Workflow: {payload.get('workflow', 'unknown')}",
-            f"- Resume start index: {start_index}",
-        ]
+        report_lines.append(f"- Resume start index: {start_index}")
 
         self._execute_plan_steps(
             plan=plan,
-            task_spec=payload.get("task_spec", {}),
+            task_spec=task_spec,
             state=state,
             report_lines=report_lines,
             start_index=start_index,
@@ -231,6 +323,7 @@ class OrchestratorV2:
         report_path = self._write_report(f"resume_{run_id}", report_lines, prefix="final_report_v2")
         state.artifacts.append(str(report_path))
 
+        payload["task_spec"] = task_spec
         payload["state"] = state.model_dump()
         self._save_json(path, payload)
         return report_path
