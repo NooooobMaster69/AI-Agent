@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import re
+import importlib.util
 
 from app_v2.policies.risk_policy import should_pause
 from app_v2.schemas.observation import Observation
@@ -33,6 +35,45 @@ TOOL_TO_ACTION = {
 
 
 class ExecutorRuntime:
+    def __init__(self) -> None:
+        self.local_worker = None
+        if importlib.util.find_spec("ollama") is not None:
+            from app_v2.models.local_client_v2 import LocalWorker
+
+            self.local_worker = LocalWorker()
+        self.enable_local_drafter = os.getenv("V2_USE_LOCAL_DRAFTER", "1").strip() == "1"
+
+    def _build_model_final_report(self, *, task: str, sources: list[dict], prior_outputs: list[str]) -> str | None:
+        if not self.enable_local_drafter:
+            return None
+        if self.local_worker is None:
+            return None
+
+        compact_sources = [
+            {"title": src.get("title", ""), "url": src.get("url", "")}
+            for src in sources[:8]
+        ]
+        prompt = (
+            "Write a practical shopping recommendation in markdown.\n"
+            "Requirements:\n"
+            "1) Start with a direct recommendation summary.\n"
+            "2) Include at least 3 concrete option directions (budget/performance/quietness).\n"
+            "3) Include exact buying criteria and red flags.\n"
+            "4) Do not claim payment or checkout was performed.\n"
+            "5) If sources are missing, still provide useful guidance based on common product-evaluation best practices.\n\n"
+            f"Task: {task}\n"
+            f"Sources: {compact_sources}\n"
+            f"Prior notes: {prior_outputs[-4:]}"
+        )
+
+        try:
+            drafted = self.local_worker.summarize(prompt, fast=False).strip()
+            if drafted:
+                return drafted
+        except Exception:
+            return None
+        return None
+
     def _extract_research_sources(self, prior_outputs: list[str]) -> list[dict]:
         sources: list[dict] = []
         current: dict | None = None
@@ -123,6 +164,9 @@ class ExecutorRuntime:
         if step_kind == "final_report":
             task = str(context.get("task", "")).strip()
             sources = self._extract_research_sources(prior_outputs)
+            drafted = self._build_model_final_report(task=task or goal, sources=sources, prior_outputs=prior_outputs)
+            if drafted:
+                return drafted
 
             lines = [
                 "# Final Recommendation",
