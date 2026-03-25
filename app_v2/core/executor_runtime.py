@@ -341,6 +341,29 @@ class ExecutorRuntime:
                 )
 
             if tool == "report_write":
+                if step_kind == "final_report" and task_spec.get("needs_external_research", False):
+                    has_valid_research = False
+                    for prev in context.get("step_results", []):
+                        if not isinstance(prev, dict):
+                            continue
+                        if not str(prev.get("step_kind", "")).startswith("research"):
+                            continue
+                        assessment = prev.get("raw_data", {}).get("research_assessment", {})
+                        if assessment.get("is_valid"):
+                            has_valid_research = True
+                            break
+                    if not has_valid_research:
+                        return StepResult(
+                            step_id=step_id,
+                            step_kind=step_kind,
+                            status="paused",
+                            summary="Final report paused: insufficient validated research evidence",
+                            output_text="",
+                            pause_reason="insufficient_research_evidence",
+                            confidence=0.3,
+                            risk_signals=["missing_evidence_gate"],
+                            raw_data={"tool": tool, "goal": goal, "context": context},
+                        )
                 report_text = self._build_report_text(step_kind=step_kind, goal=goal, context=context)
                 obs = Observation(
                     source_type="model",
