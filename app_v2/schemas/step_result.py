@@ -14,6 +14,7 @@ class StepResult(BaseModel):
     findings: List[str] = Field(default_factory=list)
 
     confidence: float = 1.0
+    risk_signals: List[str] = Field(default_factory=list)
     pause_reason: Optional[str] = None
 
     raw_data: Dict[str, Any] = Field(default_factory=dict)

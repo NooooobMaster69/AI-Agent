@@ -160,9 +160,11 @@ class OrchestratorV2:
         if start_index >= len(plan):
             report_lines += ["", "## Execution", "No remaining steps to execute."]
             state.final_status = "completed"
+            state.current_phase = "completed"
             return
 
         report_lines += ["", "## Execution"]
+        state.current_phase = "execution"
 
         for step in plan[start_index:]:
             step_kind = step.get("kind", "unknown")
@@ -207,6 +209,7 @@ class OrchestratorV2:
                 continue
 
             if step_result.status == "paused":
+                state.current_phase = "paused"
                 state.paused = True
                 state.approval_required = True
                 state.pause_reason = step_result.pause_reason
@@ -220,10 +223,12 @@ class OrchestratorV2:
             state.failure_count += 1
             if state.failure_count >= max_failures:
                 state.final_status = "execution_failed"
+                state.current_phase = "failed"
                 report_lines.append(f"- Execution stopped after {state.failure_count} failures.")
                 return
 
         state.final_status = "completed"
+        state.current_phase = "completed"
         state.paused = False
         state.approval_required = False
         state.pause_reason = None
