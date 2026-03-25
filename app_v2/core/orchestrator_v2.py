@@ -34,6 +34,25 @@ class OrchestratorV2:
         self.executor = ExecutorRuntime()
         self.arbitrator = CloudArbitrator()
 
+    def _normalize_allowed_tools(self, tools: list[str]) -> list[str]:
+        alias_map = {
+            "web_search": "web_research",
+            "web_fetch": "web_research",
+            "browser": "browser",
+            "calculator": "report_write",
+            "filesystem_read": "filesystem_read",
+            "report_write": "report_write",
+            "web_research": "web_research",
+            "run_tests": "run_tests",
+            "write_files": "write_files",
+        }
+        normalized: list[str] = []
+        for tool in tools:
+            mapped = alias_map.get(tool, tool)
+            if mapped not in normalized:
+                normalized.append(mapped)
+        return normalized
+
     def _run_json_path(self, run_id: str) -> Path:
         return RUNS_DIR / f"run_{run_id}.json"
 
@@ -86,8 +105,9 @@ class OrchestratorV2:
         state.approval_context["resume_decision"] = decision.model_dump()
 
         if decision.updated_allowed_tools:
-            task_spec["allowed_tools"] = list(dict.fromkeys(decision.updated_allowed_tools))
-            task_spec["approved_tools"] = list(dict.fromkeys(decision.updated_allowed_tools))
+            normalized_tools = self._normalize_allowed_tools(decision.updated_allowed_tools)
+            task_spec["allowed_tools"] = list(dict.fromkeys(normalized_tools))
+            task_spec["approved_tools"] = list(dict.fromkeys(normalized_tools))
 
         if decision.updated_allowed_write_paths:
             task_spec["allowed_write_paths"] = list(dict.fromkeys(decision.updated_allowed_write_paths))
@@ -160,9 +180,11 @@ class OrchestratorV2:
         if start_index >= len(plan):
             report_lines += ["", "## Execution", "No remaining steps to execute."]
             state.final_status = "completed"
+            state.current_phase = "completed"
             return
 
         report_lines += ["", "## Execution"]
+        state.current_phase = "execution"
 
         for step in plan[start_index:]:
             step_kind = step.get("kind", "unknown")
@@ -207,6 +229,7 @@ class OrchestratorV2:
                 continue
 
             if step_result.status == "paused":
+                state.current_phase = "paused"
                 state.paused = True
                 state.approval_required = True
                 state.pause_reason = step_result.pause_reason
@@ -220,10 +243,12 @@ class OrchestratorV2:
             state.failure_count += 1
             if state.failure_count >= max_failures:
                 state.final_status = "execution_failed"
+                state.current_phase = "failed"
                 report_lines.append(f"- Execution stopped after {state.failure_count} failures.")
                 return
 
         state.final_status = "completed"
+        state.current_phase = "completed"
         state.paused = False
         state.approval_required = False
         state.pause_reason = None
