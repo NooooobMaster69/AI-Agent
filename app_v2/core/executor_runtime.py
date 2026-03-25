@@ -406,10 +406,10 @@ class ExecutorRuntime:
                         status = "completed"
                         pause_reason = None
                     else:
-                        summary = "Web research paused: low relevance or insufficient sources"
+                        summary = "Web research completed with low confidence: low relevance or insufficient sources"
                         findings = [f"Research quality check failed for query: {query_used}"]
-                        status = "paused"
-                        pause_reason = "research_quality_failed"
+                        status = "completed"
+                        pause_reason = None
                 except Exception as exc:
                     research_data = {
                         "query": goal,

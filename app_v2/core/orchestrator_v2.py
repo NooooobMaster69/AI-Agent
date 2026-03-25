@@ -34,6 +34,25 @@ class OrchestratorV2:
         self.executor = ExecutorRuntime()
         self.arbitrator = CloudArbitrator()
 
+    def _normalize_allowed_tools(self, tools: list[str]) -> list[str]:
+        alias_map = {
+            "web_search": "web_research",
+            "web_fetch": "web_research",
+            "browser": "browser",
+            "calculator": "report_write",
+            "filesystem_read": "filesystem_read",
+            "report_write": "report_write",
+            "web_research": "web_research",
+            "run_tests": "run_tests",
+            "write_files": "write_files",
+        }
+        normalized: list[str] = []
+        for tool in tools:
+            mapped = alias_map.get(tool, tool)
+            if mapped not in normalized:
+                normalized.append(mapped)
+        return normalized
+
     def _run_json_path(self, run_id: str) -> Path:
         return RUNS_DIR / f"run_{run_id}.json"
 
@@ -86,8 +105,9 @@ class OrchestratorV2:
         state.approval_context["resume_decision"] = decision.model_dump()
 
         if decision.updated_allowed_tools:
-            task_spec["allowed_tools"] = list(dict.fromkeys(decision.updated_allowed_tools))
-            task_spec["approved_tools"] = list(dict.fromkeys(decision.updated_allowed_tools))
+            normalized_tools = self._normalize_allowed_tools(decision.updated_allowed_tools)
+            task_spec["allowed_tools"] = list(dict.fromkeys(normalized_tools))
+            task_spec["approved_tools"] = list(dict.fromkeys(normalized_tools))
 
         if decision.updated_allowed_write_paths:
             task_spec["allowed_write_paths"] = list(dict.fromkeys(decision.updated_allowed_write_paths))

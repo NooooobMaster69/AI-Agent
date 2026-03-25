@@ -244,7 +244,7 @@ def test_web_research_retries_with_task_context(monkeypatch):
     assert "Top Air Purifier" in result.output_text
 
 
-def test_web_research_pauses_on_irrelevant_results(monkeypatch):
+def test_web_research_returns_low_confidence_on_irrelevant_results(monkeypatch):
     runtime = ExecutorRuntime()
     import app_v2.core.executor_runtime as runtime_mod
 
@@ -263,6 +263,31 @@ def test_web_research_pauses_on_irrelevant_results(monkeypatch):
         context={"task": "what is the best gaming graphic card now"},
     )
 
-    assert result.status == "paused"
-    assert result.pause_reason == "research_quality_failed"
+    assert result.status == "completed"
+    assert "low confidence" in result.summary.lower()
     assert "sources_not_relevant_to_task" in result.risk_signals
+
+
+def test_resume_decision_tool_aliases_are_normalized():
+    orchestrator = OrchestratorV2()
+    task_spec = {"allowed_tools": ["report_write"], "approved_tools": ["report_write"]}
+    from app_v2.schemas.resume_decision import ResumeDecision
+
+    decision = ResumeDecision(
+        run_id="20260325_000001",
+        decision="continue_with_limits",
+        rationale="ok",
+        updated_allowed_tools=["web_search", "web_fetch", "calculator"],
+        updated_allowed_write_paths=[],
+    )
+
+    state = {
+        "run_id": "20260325_000001",
+        "task": "test",
+    }
+
+    from app_v2.state.run_state import RunState
+    run_state = RunState(**state)
+    orchestrator._apply_resume_decision(decision, task_spec, run_state)
+
+    assert task_spec["allowed_tools"] == ["web_research", "report_write"]
