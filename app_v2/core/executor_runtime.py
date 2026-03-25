@@ -43,6 +43,53 @@ class ExecutorRuntime:
             self.local_worker = LocalWorker()
         self.enable_local_drafter = os.getenv("V2_USE_LOCAL_DRAFTER", "1").strip() == "1"
 
+    def _query_candidates(self, goal: str, context: dict) -> list[str]:
+        candidates: list[str] = []
+        task_text = str(context.get("task", "")).strip()
+        raw_inputs = [task_text, goal]
+
+        for raw in raw_inputs:
+            if not raw:
+                continue
+            cleaned = raw
+            cleaned = re.sub(r"^[A-Za-z ]+for:\s*", "", cleaned).strip()
+            cleaned = re.sub(r"^[A-Za-z ]+:\s*", "", cleaned).strip()
+            cleaned = re.sub(r"\bcollect supporting facts,?\s*", "", cleaned, flags=re.IGNORECASE).strip()
+            cleaned = re.sub(r"\boptions,?\s*prices,?\s*and references\b", "", cleaned, flags=re.IGNORECASE).strip()
+            cleaned = cleaned.strip(" .")
+            for query in (cleaned, raw):
+                if query and query not in candidates:
+                    candidates.append(query)
+
+        return candidates or [goal]
+
+    def _assess_research_quality(self, task: str, query: str, payload: dict) -> tuple[bool, list[str], float]:
+        risk_signals: list[str] = []
+        results = payload.get("results", [])
+        if not isinstance(results, list):
+            results = []
+        if len(results) < 2:
+            risk_signals.append("source_count_too_low")
+
+        task_tokens = {t for t in re.findall(r"[a-z0-9]{3,}", task.lower()) if t not in {"what", "best", "now"}}
+        domain_hits = 0
+        for item in results:
+            if not isinstance(item, dict):
+                continue
+            text = f"{item.get('title', '')} {item.get('snippet', '')} {item.get('url', '')}".lower()
+            overlap = task_tokens.intersection(set(re.findall(r"[a-z0-9]{3,}", text)))
+            if overlap:
+                domain_hits += 1
+
+        if results and domain_hits == 0:
+            risk_signals.append("sources_not_relevant_to_task")
+        if "collect supporting facts" in query.lower():
+            risk_signals.append("query_looks_like_internal_instruction")
+
+        is_valid = bool(results) and "sources_not_relevant_to_task" not in risk_signals
+        confidence = 0.82 if is_valid else 0.35
+        return is_valid, risk_signals, confidence
+
     def _build_model_final_report(self, *, task: str, sources: list[dict], prior_outputs: list[str]) -> str | None:
         if not self.enable_local_drafter:
             return None
@@ -132,16 +179,13 @@ class ExecutorRuntime:
         return "\n".join(lines).strip()
 
     def _run_research_with_retry(self, goal: str, context: dict) -> dict:
-        candidate_queries = [goal]
+        candidate_queries = self._query_candidates(goal, context)
 
-        task_text = str(context.get("task", "")).strip()
-        if task_text and task_text not in candidate_queries:
-            candidate_queries.append(task_text)
-
+        payload: dict = {"query": goal, "engine": "none", "results": []}
         for query in candidate_queries:
             payload = research_query(query)
-            results = payload.get("results", [])
-            if isinstance(results, list) and results:
+            is_valid, _, _ = self._assess_research_quality(str(context.get("task", "")), query, payload)
+            if is_valid:
                 return payload
 
         return payload
@@ -260,6 +304,29 @@ class ExecutorRuntime:
                 )
 
             if tool == "report_write":
+                if step_kind == "final_report" and task_spec.get("needs_external_research", False):
+                    has_valid_research = False
+                    for prev in context.get("step_results", []):
+                        if not isinstance(prev, dict):
+                            continue
+                        if not str(prev.get("step_kind", "")).startswith("research"):
+                            continue
+                        assessment = prev.get("raw_data", {}).get("research_assessment", {})
+                        if assessment.get("is_valid"):
+                            has_valid_research = True
+                            break
+                    if not has_valid_research:
+                        return StepResult(
+                            step_id=step_id,
+                            step_kind=step_kind,
+                            status="paused",
+                            summary="Final report paused: insufficient validated research evidence",
+                            output_text="",
+                            pause_reason="insufficient_research_evidence",
+                            confidence=0.3,
+                            risk_signals=["missing_evidence_gate"],
+                            raw_data={"tool": tool, "goal": goal, "context": context},
+                        )
                 report_text = self._build_report_text(step_kind=step_kind, goal=goal, context=context)
                 obs = Observation(
                     source_type="model",
@@ -276,6 +343,7 @@ class ExecutorRuntime:
                     output_text=report_text,
                     findings=[f"Drafted report section for '{step_kind}'"],
                     confidence=0.9,
+                    risk_signals=[],
                     raw_data={"tool": tool, "observation": obs.model_dump(), "context": context},
                 )
 
@@ -296,6 +364,7 @@ class ExecutorRuntime:
                     output_text=workspace_excerpt[:3000],
                     findings=["Workspace contents inspected"],
                     confidence=0.8,
+                    risk_signals=[],
                     raw_data={"tool": tool, "observation": obs.model_dump(), "context": context},
                 )
 
@@ -316,6 +385,7 @@ class ExecutorRuntime:
                     output_text=test_output,
                     findings=["Pytest was executed"],
                     confidence=0.75,
+                    risk_signals=[],
                     raw_data={"tool": tool, "observation": obs.model_dump(), "context": context},
                 )
 
@@ -324,12 +394,22 @@ class ExecutorRuntime:
                     research_data = self._run_research_with_retry(goal, context)
                     serialized = self._format_research_output(research_data)
                     result_count = len(research_data.get("results", []) or [])
-                    if result_count:
+                    query_used = str(research_data.get("query", goal))
+                    is_valid, risk_signals, confidence = self._assess_research_quality(
+                        str(context.get("task", "")),
+                        query_used,
+                        research_data,
+                    )
+                    if is_valid:
                         summary = f"Web research completed ({result_count} sources)"
+                        findings = [f"Researched query: {query_used}"]
+                        status = "completed"
+                        pause_reason = None
                     else:
-                        summary = "Web research completed but returned no sources"
-                    confidence = 0.8
-                    findings = [f"Researched query: {goal}"]
+                        summary = "Web research paused: low relevance or insufficient sources"
+                        findings = [f"Research quality check failed for query: {query_used}"]
+                        status = "paused"
+                        pause_reason = "research_quality_failed"
                 except Exception as exc:
                     research_data = {
                         "query": goal,
@@ -344,6 +424,9 @@ class ExecutorRuntime:
                     summary = "Web research unavailable; returned fallback guidance"
                     confidence = 0.45
                     findings = [f"Research fallback used for query: {goal}"]
+                    risk_signals = ["web_research_unavailable"]
+                    status = "completed"
+                    pause_reason = None
                 obs = Observation(
                     source_type="web",
                     source_ref=goal,
@@ -354,12 +437,23 @@ class ExecutorRuntime:
                 return StepResult(
                     step_id=step_id,
                     step_kind=step_kind,
-                    status="completed",
+                    status=status,
                     summary=summary,
                     output_text=serialized[:3000],
                     findings=findings,
                     confidence=confidence,
-                    raw_data={"tool": tool, "research": research_data, "observation": obs.model_dump(), "context": context},
+                    risk_signals=risk_signals,
+                    pause_reason=pause_reason,
+                    raw_data={
+                        "tool": tool,
+                        "research": research_data,
+                        "research_assessment": {
+                            "is_valid": status == "completed",
+                            "risk_signals": risk_signals,
+                        },
+                        "observation": obs.model_dump(),
+                        "context": context,
+                    },
                 )
 
             return StepResult(

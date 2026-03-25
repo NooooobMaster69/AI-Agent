@@ -167,7 +167,9 @@ def test_final_report_uses_prior_outputs():
                 {"status": "completed", "output_text": "Outline: compare tea options by price and rating."},
                 {
                     "status": "completed",
+                    "step_kind": "research_benchmarks",
                     "output_text": "## Research Notes\n1. Tea Option A\n   - URL: https://example.com/a",
+                    "raw_data": {"research_assessment": {"is_valid": True}},
                 },
             ],
         },
@@ -240,3 +242,27 @@ def test_web_research_retries_with_task_context(monkeypatch):
     assert result.status == "completed"
     assert "1 sources" in result.summary
     assert "Top Air Purifier" in result.output_text
+
+
+def test_web_research_pauses_on_irrelevant_results(monkeypatch):
+    runtime = ExecutorRuntime()
+    import app_v2.core.executor_runtime as runtime_mod
+
+    def _research(query: str):
+        return {
+            "query": query,
+            "engine": "mock",
+            "results": [{"title": "Collect by WeTransfer", "url": "https://wetransfer.com", "snippet": "save ideas"}],
+        }
+
+    monkeypatch.setattr(runtime_mod, "research_query", _research)
+
+    result = runtime.execute_step(
+        step={"id": 4, "kind": "research_benchmarks", "tool": "web_research", "goal": "collect supporting facts for gpu"},
+        task_spec={"approved_tools": ["web_research"], "allowed_tools": ["web_research"]},
+        context={"task": "what is the best gaming graphic card now"},
+    )
+
+    assert result.status == "paused"
+    assert result.pause_reason == "research_quality_failed"
+    assert "sources_not_relevant_to_task" in result.risk_signals
