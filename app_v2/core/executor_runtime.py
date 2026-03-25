@@ -54,6 +54,7 @@ class ExecutorRuntime:
             cleaned = raw
             cleaned = re.sub(r"^[A-Za-z ]+for:\s*", "", cleaned).strip()
             cleaned = re.sub(r"^[A-Za-z ]+:\s*", "", cleaned).strip()
+            cleaned = re.sub(r"^find current [a-z ]+ evidence for:\s*", "", cleaned, flags=re.IGNORECASE).strip()
             cleaned = re.sub(r"\bcollect supporting facts,?\s*", "", cleaned, flags=re.IGNORECASE).strip()
             cleaned = re.sub(r"\boptions,?\s*prices,?\s*and references\b", "", cleaned, flags=re.IGNORECASE).strip()
             cleaned = cleaned.strip(" .")
@@ -71,7 +72,8 @@ class ExecutorRuntime:
         if len(results) < 2:
             risk_signals.append("source_count_too_low")
 
-        task_tokens = {t for t in re.findall(r"[a-z0-9]{3,}", task.lower()) if t not in {"what", "best", "now"}}
+        stop_tokens = {"what", "best", "now", "current", "find", "price", "value", "evidence"}
+        task_tokens = {t for t in re.findall(r"[a-z0-9]{3,}", task.lower()) if t not in stop_tokens}
         domain_hits = 0
         for item in results:
             if not isinstance(item, dict):
@@ -83,10 +85,22 @@ class ExecutorRuntime:
 
         if results and domain_hits == 0:
             risk_signals.append("sources_not_relevant_to_task")
+        gpu_task = any(k in task.lower() for k in ["gpu", "graphics", "graphic", "gaming card", "rtx", "radeon"])
+        if gpu_task and results:
+            gpu_hits = 0
+            for item in results:
+                if not isinstance(item, dict):
+                    continue
+                text = f"{item.get('title', '')} {item.get('snippet', '')} {item.get('url', '')}".lower()
+                if any(k in text for k in ["gpu", "graphics", "rtx", "radeon", "techpowerup", "tomshardware", "anandtech"]):
+                    gpu_hits += 1
+            if gpu_hits == 0:
+                risk_signals.append("missing_domain_keywords")
         if "collect supporting facts" in query.lower():
             risk_signals.append("query_looks_like_internal_instruction")
 
-        is_valid = bool(results) and "sources_not_relevant_to_task" not in risk_signals
+        fatal_signals = {"sources_not_relevant_to_task", "missing_domain_keywords"}
+        is_valid = bool(results) and not fatal_signals.intersection(risk_signals)
         confidence = 0.82 if is_valid else 0.35
         return is_valid, risk_signals, confidence
 
@@ -207,6 +221,29 @@ class ExecutorRuntime:
 
         if step_kind == "final_report":
             task = str(context.get("task", "")).strip()
+            valid_research_steps = [
+                step for step in context.get("step_results", [])
+                if isinstance(step, dict)
+                and str(step.get("step_kind", "")).startswith("research")
+                and bool(step.get("raw_data", {}).get("research_assessment", {}).get("is_valid"))
+            ]
+            if not valid_research_steps:
+                return "\n".join(
+                    [
+                        "# Final Recommendation",
+                        "",
+                        f"Task: {task or goal}",
+                        "",
+                        "## Evidence Status",
+                        "- Insufficient reliable external evidence was retrieved in this run.",
+                        "- To avoid hallucinated recommendations, no specific GPU model is asserted as 'best' here.",
+                        "",
+                        "## Next Search Queries (Retry Suggestions)",
+                        "- best gaming GPU 2026 benchmark 4k",
+                        "- RTX 5090 vs RTX 4090 gaming benchmarks",
+                        "- best GPU price to performance 2026",
+                    ]
+                )
             sources = self._extract_research_sources(prior_outputs)
             drafted = self._build_model_final_report(task=task or goal, sources=sources, prior_outputs=prior_outputs)
             if drafted:
@@ -427,6 +464,7 @@ class ExecutorRuntime:
                     risk_signals = ["web_research_unavailable"]
                     status = "completed"
                     pause_reason = None
+                    is_valid = False
                 obs = Observation(
                     source_type="web",
                     source_ref=goal,
@@ -448,7 +486,7 @@ class ExecutorRuntime:
                         "tool": tool,
                         "research": research_data,
                         "research_assessment": {
-                            "is_valid": status == "completed",
+                            "is_valid": is_valid,
                             "risk_signals": risk_signals,
                         },
                         "observation": obs.model_dump(),

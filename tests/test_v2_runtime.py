@@ -266,6 +266,7 @@ def test_web_research_returns_low_confidence_on_irrelevant_results(monkeypatch):
     assert result.status == "completed"
     assert "low confidence" in result.summary.lower()
     assert "sources_not_relevant_to_task" in result.risk_signals
+    assert result.raw_data["research_assessment"]["is_valid"] is False
 
 
 def test_resume_decision_tool_aliases_are_normalized():
@@ -291,3 +292,31 @@ def test_resume_decision_tool_aliases_are_normalized():
     orchestrator._apply_resume_decision(decision, task_spec, run_state)
 
     assert task_spec["allowed_tools"] == ["web_research", "report_write"]
+
+
+def test_final_report_refuses_specific_recommendation_without_valid_research():
+    runtime = ExecutorRuntime()
+
+    result = runtime.execute_step(
+        step={
+            "id": 7,
+            "kind": "final_report",
+            "tool": "report_write",
+            "goal": "Assemble final report.",
+        },
+        task_spec={"approved_tools": ["report_write"], "allowed_tools": ["report_write"]},
+        context={
+            "task": "What's the best gaming graphic card now",
+            "step_results": [
+                {
+                    "status": "completed",
+                    "step_kind": "research_benchmarks",
+                    "raw_data": {"research_assessment": {"is_valid": False}},
+                }
+            ],
+        },
+    )
+
+    assert result.status == "completed"
+    assert "Insufficient reliable external evidence" in result.output_text
+    assert "no specific gpu model is asserted" in result.output_text.lower()
